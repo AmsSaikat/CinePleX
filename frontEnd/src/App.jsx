@@ -11,6 +11,7 @@ import Theater from './pages/Theater'
 import TheSquad from './pages/TheSquad'
 import JoinTheater from './pages/JoinTheater'
 import ActiveTheater from './pages/ActiveTheater'
+import ChatBox from './components/ChatBox'
 
 export default function App() {
   const dispatch=useDispatch()
@@ -46,6 +47,7 @@ export default function App() {
         <Route path='/squad' element={<TheSquad/>} />
         <Route path='/join-theater' element={<JoinTheater/>} />
         <Route path='/active-theater' element={<ActiveTheater/>} />
+        <Route path="/chatbox" element={<ChatBox />} />
       </Routes>
     </div>
   )

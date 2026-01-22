@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import ChatBox from "../components/ChatBox";
 
 export default function ActiveTheater() {
   return (
@@ -94,24 +95,11 @@ export default function ActiveTheater() {
       </div>
 
       {/* Bottom Chat Section */}
-      <div className="mt-6 px-6 pb-6 grid grid-cols-12 gap-6">
+      <div className="mt-6 px-6 pb-6 grid grid-cols-12 gap-6 h-90">
 
         {/* Chat Box */}
-        <div className="col-span-8 rounded-3xl bg-[#0e1626] border border-white/10 p-4 flex flex-col">
-          <h2 className="font-semibold mb-3">💬 Theater Chat</h2>
-
-          {/* Messages */}
-          <div className="flex-1 space-y-3 overflow-hidden">
-            <ChatBubble user="Anik" msg="That docking scene 😮🔥" />
-            <ChatBubble user="Nova" msg="Hans Zimmer never misses." />
-            <ChatBubble user="Saikat" msg="Wait for the ending." />
-          </div>
-
-          {/* Input (UI only) */}
-          <div className="mt-4 flex items-center gap-3 bg-[#070c17] rounded-xl px-4 py-3 text-gray-500">
-            <span>Type a message...</span>
-            <span className="ml-auto">😊</span>
-          </div>
+        <div className="col-span-8 rounded-3xl bg-[#0e1626] h-90 overflow-y-auto flex-1 border  border-white/10 p-4 flex flex-col">
+          <ChatBox/>
         </div>
 
         {/* Theater Stats */}

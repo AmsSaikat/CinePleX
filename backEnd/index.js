@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser"
 import authRouter from "./routes/authRoutes.js"
 import { connectDB } from "./config/connectDB.js"
 import cors from 'cors'
+import http from 'http'
+import setupChatSocket from "./config/socketConn.js"
 
 
 
@@ -21,6 +23,11 @@ app.use(cors({
 
 app.use("/api/auth",authRouter)
 
+const server=http.createServer(app)
+setupChatSocket(server)
+
+
+
 
 const PORT=process.env.PORT || 5000
-app.listen(PORT,()=>console.log(`Server running on port ${PORT}`))
+server.listen(PORT,()=>console.log(`Server running on port ${PORT}`))

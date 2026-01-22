@@ -1,15 +1,10 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Slider from '../components/Slider.jsx'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { user, isAuthenticated, loading } = useSelector(
-    (state) => state.auth
-  )
-
   return (
     <div className='bg-[#0b1320] text-white min-h-screen'>
 
