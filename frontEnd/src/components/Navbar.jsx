@@ -15,7 +15,7 @@ export default function Navbar() {
               <li className='hover:border-2 border-b-slate-900 px-2'>Movies</li>
               <li className='hover:border-2 border-b-slate-900 px-2' onClick={()=>navigate('/theater')}>Theaters</li>
               <li className='hover:border-2 border-b-slate-900 px-2'>Tickets</li>
-              <li className='hover:border-2 border-b-slate-900 px-2'>Schedule</li>
+              <li className='hover:border-2 border-b-slate-900 px-2' onClick={()=>navigate('/schedule')}>Schedule</li>
               <li className='hover:border-2 border-b-slate-900 px-2 underline' onClick={()=>navigate('/squad')}>#TheSQUAD</li>
             </ul>
           </div>

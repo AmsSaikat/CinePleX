@@ -12,6 +12,8 @@ import TheSquad from './pages/TheSquad'
 import JoinTheater from './pages/JoinTheater'
 import ActiveTheater from './pages/ActiveTheater'
 import ChatBox from './components/ChatBox'
+import SchedulePage from './pages/SchedulePage'
+import UploadMovieModal from './pages/movieModal/UploadMovieModal'
 
 export default function App() {
   const dispatch=useDispatch()
@@ -44,10 +46,14 @@ export default function App() {
         <Route path='/login' element={<LoginPage/>} />
         <Route path='/' element={<HomePage/>} />
         <Route path='/theater' element={<Theater/>} />
+        <Route path='/schedule' element={<SchedulePage/>} />
         <Route path='/squad' element={<TheSquad/>} />
         <Route path='/join-theater' element={<JoinTheater/>} />
         <Route path='/active-theater' element={<ActiveTheater/>} />
         <Route path="/chatbox" element={<ChatBox />} />
+
+
+        <Route path="/test" element={<UploadMovieModal />} />
       </Routes>
     </div>
   )
