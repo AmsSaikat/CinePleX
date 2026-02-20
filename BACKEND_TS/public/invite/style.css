@@ -1,0 +1,152 @@
+:root {
+    /* Theme Colors: Dark Purple */
+    --bg-body: #120d18;
+    --bg-card: #1a1623;
+    --primary-accent: #bb86fc;
+    --secondary-accent: #3700b3;
+    --text-main: #ffffff;
+    --text-muted: #b0a8c2;
+    --border-radius: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Subtle radial gradient background */
+    background-image: radial-gradient(circle at 50% 30%, rgba(55, 0, 179, 0.2) 0%, transparent 60%);
+}
+
+.page-container {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.join-card {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(187, 134, 252, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* --- Branding --- */
+.brand-small {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0.7;
+}
+
+/* --- Text Section --- */
+.invitation-text h1 {
+    font-size: 1.3rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-main);
+}
+
+.accent-text {
+    color: var(--primary-accent);
+    font-weight: 600;
+}
+
+/* --- Theater Preview Card --- */
+.theater-preview-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.theater-card-preview {
+    width: 100%;
+    aspect-ratio: 3 / 2; /* 3:2 Ratio */
+    background-color: #2c243a;
+    border-radius: var(--border-radius);
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    /* Initial placeholder bg */
+    background-image: url('https://via.placeholder.com/400x266/2c243a/ffffff?text=Loading'); 
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Gradient to make text readable at bottom */
+    background: linear-gradient(to top, rgba(18, 13, 24, 0.95) 0%, transparent 60%);
+}
+
+.card-content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    text-align: left;
+    z-index: 2;
+}
+
+.card-content h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    margin: 0;
+}
+
+/* --- Button --- */
+.action-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(90deg, var(--secondary-accent), var(--primary-accent));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(187, 134, 252, 0.4);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.class-normal{
+    display: none;
+}
+.class-no-theater{
+    display: none;
+}
+.class-already{
+    display: none;
+}

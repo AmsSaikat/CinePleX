@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOND's Cineplex - Watch Together, Anywhere</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.png">
+</head>
+<body>
+
+    <!-- Background Atmospheric Elements -->
+    <div class="ambient-light"></div>
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="brand">
+            <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
+            <h1>BOND's Cineplex</h1>
+        </div>
+        <div class="nav-actions">
+            <a href="#" id="nav-cta-btn" class="cta-button small">Loading...</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="hero-content">
+            <div class="badge-pill"><i class="fa-solid fa-bolt"></i> Real-time Sync</div>
+            <h1 class="hero-title">Your Private <br><span class="gradient-text">Theater Experience</span></h1>
+            <p class="hero-sub">
+                Don't watch alone. Create a room, invite your friends, and experience movies in perfect sync with crystal clear voice chat and real-time reactions.
+            </p>
+            
+            <div class="hero-buttons">
+                <button id="hero-main-btn" class="cta-button primary">
+                    <span class="btn-text">Get Started</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <!-- <button class="cta-button secondary">
+                    <i class="fa-solid fa-play"></i> Watch Demo
+                </button> -->
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-num">HD</span>
+                    <span class="stat-desc">Streaming</span>
+                </div>
+                <div class="divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">~50ms</span>
+                    <span class="stat-desc">Latency</span>
+                </div>
+                <div class="divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num"><i class="fa-solid fa-users"></i></span>
+                    <span class="stat-desc">Unlimited</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual / 3D Element -->
+        <div class="hero-visual">
+            <div class="visual-container">
+                <div class="screen-glow"></div>
+                <div class="cinema-screen">
+                    <div class="screen-content">
+                        <!-- Simulated Movie UI -->
+                        <div class="movie-ui-overlay">
+                            <div class="play-icon"><i class="fa-solid fa-play"></i></div>
+                            <div class="reaction-bubble r1">❤️</div>
+                            <div class="reaction-bubble r2">😂</div>
+                            <div class="reaction-bubble r3">😮</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-mockup">
+                    <div class="chat-bubbles">
+                        <div class="bubble left">Start the movie?</div>
+                        <div class="bubble right">Ready! 🍿</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Strip -->
+    <section class="features-strip">
+        <div class="feature-card hidden-on-scroll">
+            <div class="icon-box"><i class="fa-solid fa-rotate"></i></div>
+            <h3>Perfect Sync</h3>
+            <p>Pause, play, and seek together. No one gets left behind.</p>
+        </div>
+        <div class="feature-card hidden-on-scroll delay-1">
+            <div class="icon-box"><i class="fa-solid fa-microphone-lines"></i></div>
+            <h3>Voice Chat</h3>
+            <p>Laugh and talk in real-time with built-in low latency audio.</p>
+        </div>
+        <div class="feature-card hidden-on-scroll delay-2">
+            <div class="icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h3>Custom Rooms</h3>
+            <p>Customize your theater environment to match the mood.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 BOND's Cineplex. The ultimate shared viewing experience.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

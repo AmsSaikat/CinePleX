@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Settings - </title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.png">
+</head>
+<body>
+
+    <!-- Main Container -->
+    <div class="settings-container">
+        
+        <div class="header-section">
+            <h1><i class="fa-solid fa-sliders"></i> Theater Settings</h1>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-target="basic-tab">Basic Info</button>
+            <button class="tab-btn" data-target="video-tab">Video File</button>
+        </div>
+
+        <!-- TAB 1: Basic Info -->
+        <div id="basic-tab" class="tab-content active">
+            <div class="form-group">
+                <label>Theater Name</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-masks-theater"></i>
+                    <input type="text" id="theater-name" placeholder="Enter theater name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Premier Time</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    <input type="datetime-local" id="premier-time">
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button id="save-changes-btn" class="primary-btn">Save Changes</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: Video File (4 States) -->
+        <div id="video-tab" class="tab-content">
+            
+            <!-- State 0: Pre-upload & Ready -->
+            <div id="upload-state-0" class="upload-ui-state">
+                
+                <!-- View A: Select File -->
+                <div id="view-select-file" class="upload-box">
+                    <i class="fa-solid fa-cloud-arrow-up main-icon"></i>
+                    <h3>Upload Movie File</h3>
+                    <p>Select a video file to stream in this theater</p>
+                    <input type="file" id="file-input" accept=".mp4,.mkv,.avi,.mov,.webm" hidden>
+                    <button id="select-file-btn" class="secondary-btn">Select File</button>
+                </div>
+
+                <!-- View B: Ready to Upload (Hidden by default) -->
+                <div id="view-file-ready" class="upload-box hidden">
+                    <i class="fa-regular fa-file-video main-icon" style="color: var(--primary-accent);"></i>
+                    <h3 id="ready-file-name" style="margin-bottom: 15px;">filename.mp4</h3>
+                    
+                    <div class="ready-actions">
+                        <button id="start-upload-btn" class="primary-btn">
+                            <i class="fa-solid fa-upload"></i> Start Upload
+                        </button>
+                        <button id="cancel-selection-btn" class="secondary-btn" style="margin-top: 10px; border: none;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- State 1: Uploading -->
+            <div id="upload-state-1" class="upload-ui-state hidden">
+                <div class="progress-box">
+                    <div class="info-row">
+                        <span>Uploading...</span>
+                        <span id="upload-percent-text">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="upload-progress-fill" class="progress-bar-fill"></div>
+                    </div>
+                    <p class="warning-text"><i class="fa-solid fa-triangle-exclamation"></i> Do not close this page</p>
+                </div>
+            </div>
+
+            <!-- State 2: Processing -->
+            <div id="upload-state-2" class="upload-ui-state hidden">
+                <div class="progress-box processing">
+                    <div class="info-row">
+                        <span><i class="fa-solid fa-gear fa-spin"></i> Processing Video...</span>
+                        <span id="process-percent-text">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="process-progress-fill" class="progress-bar-fill purple"></div>
+                    </div>
+                    <p class="sub-text">Optimizing for streaming</p>
+                </div>
+            </div>
+
+            <!-- State 3: Uploaded -->
+            <div id="upload-state-3" class="upload-ui-state hidden">
+                <div class="file-card">
+                    <div class="file-icon">
+                        <i class="fa-solid fa-file-video"></i>
+                    </div>
+                    <div class="file-info">
+                        <h3 id="file-name">movie.mp4</h3>
+                        <p>
+                            <span id="file-duration">02:30:00</span> • 
+                            <span id="file-res" class="badge">1080p</span>
+                        </p>
+                    </div>
+                    <button id="remove-video-btn" class="icon-btn danger">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Full Screen Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loader-content">
+            <!-- As requested, using img tag -->
+            <img src="./loading.gif" alt="Loading..." onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <!-- Fallback CSS Spinner if image is missing -->
+            <div class="fallback-spinner" style="display:none;"></div> 
+            <p>Saving Changes...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

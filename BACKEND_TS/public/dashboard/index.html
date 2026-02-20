@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOND's Cineplex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.png">
+</head>
+<body>
+
+    <div id="loading">
+        <img src="loading.gif">
+    </div>
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="brand">
+            <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
+            <h1>BOND's Cineplex</h1>
+        </div>
+        <div class="user-actions">
+            <div class="user-profile">
+                <img id="user-dp" src="https://via.placeholder.com/150" alt="User">
+                <span id="user-name">Loading...</span>
+            </div>
+            <button id="logout-btn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Left Sidebar Tabs -->
+        <aside class="sidebar">
+            <nav>
+                <ul id="tab-list">
+                    <!-- Tab indices: 0, 1, 2, 3 -->
+                    <li class="tab-link active" data-index="0" data-target="theaters">
+                        <i class="fa-solid fa-masks-theater"></i> Theaters
+                    </li>
+                    <li class="tab-link" data-index="1" data-target="movies">
+                        <i class="fa-solid fa-clapperboard"></i> Movies/Shows
+                    </li>
+                    <li class="tab-link" data-index="2" data-target="settings">
+                        <i class="fa-solid fa-gear"></i> Settings
+                    </li>
+                    <li class="tab-link" data-index="3" data-target="account">
+                        <i class="fa-solid fa-user"></i> Account
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Right Side Content Area -->
+        <section class="content-area">
+            
+            <!-- THEATERS TAB CONTENT -->
+            <div id="theaters" class="tab-content active">
+                
+                <!-- Collection 1: My Theaters -->
+                <div class="section-header">
+                    <h2>My Theaters</h2>
+                    <button id="create-btn" class="add-btn"><i class="fa-solid fa-plus"></i> Create New</button>
+                </div>
+                <!-- Content injected here via JS -->
+                <div id="my-theaters-list" class="card-grid"></div>
+
+                <!-- Collection 2: Joined Theaters -->
+                <div class="section-header mt-large">
+                    <h2>Joined Theaters</h2>
+                </div>
+                <!-- Content injected here via JS -->
+                <div id="joined-theaters-list" class="card-grid"></div>
+
+            </div>
+
+            <!-- MOVIES TAB CONTENT -->
+            <div id="movies" class="tab-content">
+                <div class="empty-state">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <h2>Movies & Shows</h2>
+                    <p>Select a theater to view movies.</p>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB CONTENT -->
+            <div id="settings" class="tab-content">
+                <div class="empty-state">
+                    <i class="fa-solid fa-gear"></i>
+                    <h2>Settings</h2>
+                </div>
+            </div>
+
+            <!-- ACCOUNT TAB CONTENT -->
+            <div id="account" class="tab-content">
+                <div class="empty-state">
+                    <i class="fa-solid fa-user"></i>
+                    <h2>Account</h2>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="dash.js"></script>
+</body>
+</html>

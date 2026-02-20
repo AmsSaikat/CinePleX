@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Player - BOND's Cineplex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="player-container" id="player-container">
+        
+        <video id="main-video">
+            <!-- Source will be loaded via JS -->
+        </video>
+
+        <div id="error-no-video" style="display: none;">
+            <span>❕No Video has been added by host</span>
+        </div>
+
+        <div id="subtitle-display" class="subtitle-text hidden"></div>
+
+        <div id="buffer-overlay" class="buffer-overlay hidden">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Layer for floating reaction bubbles -->
+        <div id="reaction-visual-layer" class="reaction-visual-layer"></div>
+
+        <div id="controls-layer" class="controls-layer">            
+
+            <div id="members-panel">
+                
+            </div>
+            
+            <div class="top-bar-overlay">
+                <button id="theater-settings-btn" class="icon-text-btn" style="z-index: 99;">
+                    <i class="fa-solid fa-sliders"></i> Theater Settings
+                </button>
+            </div>
+
+            <div class="bottom-bar-overlay">
+                
+                <!-- Quick Reaction Bar -->
+                <div id="quick-reaction-bar" class="quick-reaction-bar">
+                    <!-- Emojis injected via JS -->
+                </div>
+
+                <div class="timeline-container" id="timeline-container">
+                    <div class="timeline-bg"></div>
+                    <div class="timeline-fill" id="timeline-fill"></div>
+                    <div class="timeline-thumb" id="timeline-thumb"></div>
+                </div>
+
+                <div class="controls-row">
+                    
+                    <div class="left-controls">
+                        <button id="play-pause-btn" class="control-btn">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <span class="time-display">
+                            <span id="current-time">00:00</span> / <span id="total-time">00:00</span>
+                        </span>
+
+                        <button onclick="OnVideoControlModeSwitch()" id="control-mode-btn" class="control-btn" style="width: 250px; font-size: 16px; border-radius: 1000px;">
+                            Video control: Host only⭐
+                        </button>
+                    </div>
+
+                    <div class="right-controls">
+
+                        <button  onclick="OnMicButtonClick()" id="join-call-btn" class="control-btn dual-icon-btn" style="border: 1px solid white; border-radius: 1000px; padding-left: 10px; padding-right: 10px; font-size: 16px;">
+                            Join Voice Chat
+                        </button>
+
+                        <button onclick="OnMicButtonClick()" id="mic-btn" class="control-btn" style="border-radius: 100%; display: none;">
+                            <i id="mic-icon-off" class="fa-solid fa-microphone-slash"></i>
+                            <i id="mic-icon-on" style="display: none;" class="fa-solid fa-microphone"></i>
+                        </button>
+
+                        <button id="chat-btn" class="control-btn" style="position: relative;">
+                            <i class="fa-regular fa-comment-dots"></i>
+                            <div id="notification-icon" style="height: 12px; width: 12px; border-radius: 100%; position: absolute; top: 0; right: 0; background-color: red; display: none;"> </div>
+                        </button>
+                        
+                        <button id="audio-sub-btn" class="control-btn dual-icon-btn">
+                            <i class="fa-solid fa-music"></i>
+                            <span class="divider">|</span>
+                            <i class="fa-regular fa-closed-captioning"></i>
+                        </button>
+                        
+                        <button id="fullscreen-btn" class="control-btn">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div id="chat-panel" class="chat-panel">
+            <div class="chat-header">
+                <h3>Live Chat</h3>
+                <button id="close-chat-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="chat-body" id="chat-body">
+                <!-- Messages injected here via app.js -->
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chat-input-field" placeholder="Type a message..." autocomplete="off">
+                <button id="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div id="track-modal" class="modal-backdrop hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Audio & Subtitles</h2>
+                    <button id="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div class="track-columns">
+                    <div class="track-col">
+                        <h3><i class="fa-solid fa-music"></i> Audio</h3>
+                        <ul id="audio-list" class="track-list">
+                        </ul>
+                    </div>
+                    
+                    <div class="track-col">
+                        <h3><i class="fa-regular fa-closed-captioning"></i> Subtitles</h3>
+                        <ul id="subtitle-list" class="track-list">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+    <script src="./theater.js"></script>
+</body>
+</html>

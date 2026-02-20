@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Theater - BOND's Cineplex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.png">
+</head>
+<body>
+
+    <div class="page-container">
+        <div class="join-card">
+            
+            <!-- Small Brand Header -->
+            <div class="brand-small">
+                <i class="fa-solid fa-film"></i> BOND's Cineplex
+            </div>
+
+            <div class="class-loading">
+                <img src="./loading.gif">
+                <br>
+                <span>Loading...</span>
+            </div>
+
+            <!-- Invitation Text -->
+            <div class="class-normal invitation-text">
+                <h1 id="invitation-headline">
+                    <span class="accent-text" id="inviter-name">User</span> 
+                    has asked you to join Theater:
+                </h1>
+            </div>
+            <div class="class-no-theater invitation-text">
+                <h1 id="invitation-headline">
+                    ❗Invalid invitation link
+                </h1>
+            </div>
+            <div class="class-already invitation-text">
+                <h1 id="invitation-headline">
+                    ❕You are already a member of this theater
+                </h1>
+            </div>
+
+            <!-- Theater Preview Card -->
+            <div class="class-normal theater-preview-container">
+                <div id="theater-card" class="theater-card-preview">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <h2 id="theater-name-display">Theater Name</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button id="join-btn" class="class-normal action-btn">
+                Join Theater
+            </button>
+            <button id="join-btn" class="class-already action-btn" onclick="window.location.href='/dashboard'">
+                Go to Dashboard
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

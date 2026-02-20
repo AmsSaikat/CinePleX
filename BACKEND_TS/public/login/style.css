@@ -1,0 +1,166 @@
+:root {
+    /* Theme Colors: Dark Purple (Same as Dashboard) */
+    --bg-body: #120d18;
+    --bg-card: #1a1623;
+    --bg-input: #241e30;
+    --primary-accent: #bb86fc;
+    --secondary-accent: #3700b3;
+    --text-main: #ffffff;
+    --text-muted: #b0a8c2;
+    --error-color: #cf6679;
+    --border-radius: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: radial-gradient(circle at 50% 10%, rgba(55, 0, 179, 0.15) 0%, transparent 40%);
+}
+
+.login-container {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.login-card {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 24px; /* Slightly rounder for the card */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+/* --- Brand Section --- */
+.brand-header {
+    margin-bottom: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--secondary-accent), var(--primary-accent));
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 15px;
+    box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+}
+
+.brand-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.brand-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- Form Elements --- */
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+input {
+    width: 100%;
+    padding: 16px 20px 16px 50px; /* Left padding for icon */
+    background-color: var(--bg-input);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    color: var(--text-main);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+input:focus {
+    border-color: var(--primary-accent);
+    background-color: #2a2238;
+    box-shadow: 0 0 15px rgba(187, 134, 252, 0.1);
+}
+
+input:focus + .input-icon, /* This specific selector won't work due to DOM order, handled via JS if needed or just pure css focus within */
+.input-group:focus-within .input-icon {
+    color: var(--primary-accent);
+}
+
+/* --- Button --- */
+button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 10px;
+    background: linear-gradient(90deg, var(--secondary-accent), var(--primary-accent));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(187, 134, 252, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* --- Messages --- */
+.error-message {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    min-height: 20px; /* Prevent jump */
+    text-align: left;
+    padding-left: 10px;
+    display: none; /* Hidden by default */
+}
+
+.error-message-top {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: -20px;
+}

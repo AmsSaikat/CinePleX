@@ -1,0 +1,159 @@
+:root {
+    --bg-body: #120d18;
+    --bg-card: #1a1623;
+    --bg-input: #241e30;
+    --primary-accent: #bb86fc;
+    --secondary-accent: #3700b3;
+    --text-main: #ffffff;
+    --text-muted: #b0a8c2;
+    --danger-color: #cf6679;
+    --border-radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+.settings-container {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 600px;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.header-section { margin-bottom: 25px; text-align: center; }
+.header-section h1 { font-size: 1.5rem; font-weight: 500; }
+.header-section i { color: var(--primary-accent); margin-right: 10px; }
+
+/* --- Tabs --- */
+.tabs-nav {
+    display: flex;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 15px;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: 0.3s;
+}
+
+.tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.02); }
+.tab-btn.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); font-weight: 600; }
+
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
+.tab-content.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Forms --- */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
+
+.input-wrapper { position: relative; }
+.input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.input-wrapper input {
+    width: 100%; padding: 12px 15px 12px 45px;
+    background: var(--bg-input); border: 1px solid transparent;
+    border-radius: var(--border-radius); color: white; outline: none;
+    font-size: 1rem;
+}
+.input-wrapper input:focus { border-color: var(--primary-accent); }
+/* Custom Calendar Icon Color hack */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+.action-area { margin-top: 30px; }
+.primary-btn { width: 100%; padding: 14px; background: var(--primary-accent); border: none; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; color: #000; }
+.primary-btn:hover { background: white; }
+
+/* --- Video Tab UI --- */
+.hidden { display: none !important; }
+
+/* State 0: Upload Box */
+.upload-box {
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: var(--border-radius);
+    padding: 40px 20px;
+    text-align: center;
+    transition: 0.2s;
+}
+.upload-box:hover { border-color: var(--primary-accent); background: rgba(187, 134, 252, 0.05); }
+.main-icon { font-size: 3rem; color: var(--text-muted); margin-bottom: 15px; }
+.upload-box h3 { margin-bottom: 5px; }
+.upload-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+.secondary-btn { padding: 10px 25px; background: transparent; border: 1px solid var(--primary-accent); color: var(--primary-accent); border-radius: 20px; cursor: pointer; transition: 0.2s; }
+.secondary-btn:hover { background: var(--primary-accent); color: #000; }
+
+/* State 1 & 2: Progress */
+.progress-box {
+    background: var(--bg-input);
+    padding: 25px;
+    border-radius: var(--border-radius);
+}
+.info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+.progress-bar-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 15px; }
+.progress-bar-fill { height: 100%; width: 0%; background: #00e676; transition: width 0.3s ease; }
+.progress-bar-fill.purple { background: var(--primary-accent); } /* For processing state */
+
+.warning-text { color: #ffab40; font-size: 0.8rem; }
+.sub-text { color: var(--text-muted); font-size: 0.8rem; }
+
+/* State 3: File Card */
+.file-card {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.file-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary-accent); margin-right: 15px; }
+.file-info { flex: 1;     word-break: break-all;}
+.file-info h3 { font-size: 1rem; font-weight: 500; margin-bottom: 2px; }
+.file-info p { font-size: 0.85rem; color: var(--text-muted); }
+.badge { background: var(--secondary-accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 5px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.icon-btn.danger { background: rgba(207, 102, 121, 0.1); color: var(--danger-color); }
+.icon-btn.danger:hover { background: var(--danger-color); color: white; }
+.ready-file-name {    word-break: break-all;}
+
+/* --- Loading Overlay --- */
+.loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
+}
+.loader-content { text-align: center; }
+.loader-content img { width: 64px; height: 64px; margin-bottom: 15px; }
+.fallback-spinner {
+    width: 50px; height: 50px;
+    border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary-accent);
+    border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- Ready To Upload View --- */
+.ready-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    max-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#view-file-ready {
+    border-color: var(--primary-accent);
+    background: rgba(187, 134, 252, 0.05);
+}

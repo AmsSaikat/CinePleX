@@ -1,0 +1,492 @@
+:root {
+    --bg-body: #000000;
+    --primary-accent: #bb86fc;
+    --secondary-accent: #3700b3;
+    --progress-red: #ff0000;
+    --text-main: #ffffff;
+    --overlay-bg: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    --panel-bg: #1a1623;
+    --chat-bg: #120f18;
+    --bubble-self: #6200ea;
+    --bubble-other: rgba(255, 255, 255, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+.player-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+}
+
+/* --- Video --- */
+video { width: 100%; height: 100%; object-fit: contain; }
+
+/* --- Subtitle Overlay --- */
+.subtitle-text {
+    position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 1.5rem; color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    background-color: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 5px;
+    pointer-events: none; z-index: 5; transition: opacity 0.2s;
+}
+.subtitle-text.hidden { opacity: 0; }
+
+/* --- Buffer Spinner --- */
+.buffer-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+    z-index: 10; transition: opacity 0.3s;
+}
+.buffer-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.spinner {
+    width: 60px; height: 60px;
+    border: 6px solid rgba(255,255,255,0.3); border-top: 6px solid var(--primary-accent);
+    border-radius: 50%; animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- Controls Layer --- */
+.controls-layer {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 20px; transition: opacity 0.5s ease; z-index: 20;
+    background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.5));
+}
+
+.controls-layer.idle { opacity: 0; cursor: none; }
+
+/* Top Bar */
+.top-bar-overlay { display: flex; justify-content: flex-start; }
+.icon-text-btn {
+    background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2);
+    padding: 10px 20px; border-radius: 30px; cursor: pointer; display: flex;
+    align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.2s;
+}
+.icon-text-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Bottom Bar */
+.bottom-bar-overlay { 
+    padding: 20px; 
+    margin: -20px; 
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+    position: relative; /* Context for absolute positioning of reaction bar */
+}
+
+/* Quick Reaction Bar */
+.quick-reaction-bar {
+    position: absolute;
+    bottom: 85px; /* Sits above controls/timeline */
+    left: 20px;
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    padding: 8px 12px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    bottom: 120px;
+    scale: 1.35;
+    left: 50px;
+}
+
+.reaction-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+    padding: 0 4px;
+}
+
+.reaction-btn:hover {
+    transform: scale(1.35) translateY(-5px);
+}
+
+.reaction-btn:active {
+    transform: scale(0.9);
+}
+
+/* Reaction Visual Layer (Floating Bubbles) */
+.reaction-visual-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; /* Let clicks pass through to video/controls */
+    z-index: 15; /* Between buffer and controls */
+    overflow: hidden;
+}
+
+.reaction-bubble {
+    position: absolute;
+    bottom: 150px; /* Start align with bar */
+    left: 50px; /* Dynamic */
+    font-size: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    animation: floatUp 2s ease-out forwards;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    scale: 1.5;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.5);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-400px) scale(1.25) translateX(var(--rnd-x, 0px));
+    }
+}
+
+/* Timeline */
+.timeline-container {
+    width: 100%; height: 6px; position: relative; cursor: pointer;
+    margin-bottom: 20px; padding: 10px 0;
+}
+.timeline-bg {
+    position: absolute; top: 50%; left: 0; right: 0; height: 4px;
+    background: rgba(255,255,255,0.3); border-radius: 2px; transform: translateY(-50%);
+}
+.timeline-fill {
+    position: absolute; top: 50%; left: 0; height: 4px; width: 0%;
+    background: var(--progress-red); border-radius: 2px; transform: translateY(-50%); pointer-events: none;
+}
+.timeline-thumb {
+    position: absolute; top: 50%; left: 0%; width: 14px; height: 14px;
+    background: white; border-radius: 50%; transform: translate(-50%, -50%);
+    pointer-events: none; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: transform 0.1s;
+}
+.timeline-container:hover .timeline-thumb { transform: translate(-50%, -50%) scale(1.3); }
+
+/* Control Buttons */
+.controls-row { display: flex; justify-content: space-between; align-items: center; }
+.left-controls, .right-controls { display: flex; align-items: center; gap: 20px; }
+.control-btn {
+    background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;
+    opacity: 0.8; transition: 0.2s; width: 40px; height: 40px; display: flex;
+    align-items: center; justify-content: center; border-radius: 50%;
+}
+.control-btn:hover { opacity: 1; transform: scale(1.1); }
+.dual-icon-btn { width: auto; gap: 8px; padding: 0 10px; font-size: 1.2rem; }
+.time-display { font-size: 0.95rem; font-weight: 500; opacity: 0.9; }
+
+#chat-btn.active { background-color: white; color: black; opacity: 1; }
+
+/* --- Chat Panel --- */
+.chat-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 500px;
+    background-color: var(--panel-bg); transform: translateX(100%);
+    transition: transform 0.3s ease; z-index: 30;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column;
+}
+.chat-panel.open { transform: translateX(0); }
+
+.chat-header {
+    padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    background-color: #15111c;
+}
+#close-chat-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
+
+/* Chat Body (Scrollable) */
+.chat-body {
+    flex: 1; 
+    padding: 15px; 
+    overflow-y: auto; 
+    background-color: var(--chat-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.chat-body::-webkit-scrollbar { width: 6px; }
+.chat-body::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+.chat-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+/* Chat Messages */
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: fadeIn 0.2s ease-out;
+    border-radius: 5px;
+    background: rgba(50, 50, 50);
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.sender-name { font-size: 0.75rem; color: #aaa; margin-bottom: 4px; margin-left: 4px; }
+
+.message-bubble {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    color: white;
+}
+
+/* Self vs Other */
+.chat-message.self { align-self: flex-end; align-items: flex-end; }
+.chat-message.self .sender-name { display: none; }
+.chat-message.self .message-bubble {
+    background-color: var(--bubble-self);
+    border-bottom-right-radius: 2px;
+}
+
+.chat-message.other { align-self: flex-start; align-items: flex-start; }
+.chat-message.other .message-bubble {
+    background-color: var(--bubble-other);
+    border-bottom-left-radius: 2px;
+}
+
+/* Sticker & Info */
+.sticker-img { max-width: 140px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); }
+.info-message {
+    align-self: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #bbb;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin: 8px 0;
+}
+
+/* Input Area */
+.chat-input-area {
+    padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex; gap: 10px; background-color: var(--panel-bg);
+}
+.chat-input-area input {
+    flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+    color: white; padding: 10px 15px; border-radius: 25px; outline: none; transition: 0.2s;
+}
+.chat-input-area input:focus { border-color: var(--primary-accent); }
+.chat-input-area button {
+    background: var(--primary-accent); border: none; color: black;
+    width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.chat-input-area button:hover { transform: scale(1.05); }
+
+/* --- Modal Base --- */
+.modal-backdrop {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+    z-index: 40; display: flex; justify-content: center; align-items: center;
+    transition: opacity 0.3s;
+}
+.modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+
+.modal-card {
+    background: var(--panel-bg); width: 600px; max-width: 90%;
+    border-radius: 16px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+#close-modal-btn, #close-shortcuts-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.track-columns { display: flex; gap: 30px; }
+.track-col { flex: 1; }
+.track-col h3 { font-size: 1rem; color: var(--primary-accent); margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+.track-list { list-style: none; }
+.track-list li {
+    padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; font-size: 0.95rem;
+}
+.track-list li:hover { background: rgba(255,255,255,0.05); }
+.track-list li.selected { background: rgba(187, 134, 252, 0.2); color: var(--primary-accent); font-weight: 600; }
+
+/* ------------------------------------------- */
+/* --- Modern Professional Shortcuts Modal --- */
+/* ------------------------------------------- */
+
+.shortcuts-card {
+    width: 650px;
+    background: #18141d;
+    background: radial-gradient(circle at top left, #1f1b29, #120e16);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+}
+
+.shortcuts-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.shortcut-category {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.shortcut-category.full-span {
+    grid-column: 1 / -1;
+}
+
+.cat-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.key-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.key-label {
+    font-size: 0.9rem;
+    color: #e0e0e0;
+    font-weight: 400;
+}
+
+.key-combo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.key-separator {
+    color: #666;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Realistic Keycap Style */
+.key-cap {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    
+    /* Keycap Gradient & Depth */
+    background: linear-gradient(180deg, #4d4d4d 0%, #2e2e2e 100%);
+    border: 1px solid #5c5c5c;
+    border-bottom: 3px solid #1a1a1a; /* The 3D Depth */
+    border-radius: 5px;
+    
+    /* Font Styling */
+    color: #f0f0f0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+    
+    transition: transform 0.1s ease;
+}
+
+.key-cap.large {
+    min-width: 60px;
+}
+
+/* ------------------------------------------- */
+
+
+#error-no-video{
+    position: absolute; top: 0; left: 0; height: 100%; width: 100%;
+    background-color: rgba(30, 0, 0); display: flex; justify-content: center; align-items: center;
+}
+#error-no-video span{ font-size: 40px; font-weight: bold; }
+
+.disabled-interaction { cursor: not-allowed !important; opacity: 0.5; }
+.disabled-interaction * { cursor: not-allowed !important; }
+
+.self{ background-color: indigo; }
+
+#members-panel{
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;   /* start from top */
+    align-items: flex-end;         /* right side, no stretch */
+
+    height: 100vh;
+    width: 100vw;
+    padding: 20px;
+
+    _background-color: #ff037082;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.members-card{
+    margin-bottom: 5px;
+    min-width: 20px;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 1000px;
+    background-color: #ffffff22;
+    border: 0.75px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.members-card i{
+    margin-right: 5px;
+}
+
+#enter-theater-btn{
+    border: 0;
+    padding: 10px;
+    margin: 20px;
+    background-color: #3700b3;
+    color: white;
+    font-weight: bold;
+    border-radius: 1000px;
+    font-size: 22.5px;
+    padding-left: 25px;
+    padding-right: 25px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+#enter-theater-btn:hover{
+    scale: 1.1;
+}
+#enter-theater-btn:active{
+    scale: 0.9;
+}
+
+#splash{
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  color: white;
+}
+
+#splash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/theater_banner.jpg") center / cover no-repeat;
+  filter: blur(10px) brightness(0.5);
+  transform: scale(1.1); /* prevents blur edge clipping */
+  z-index: -1;
+}
