@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import Input from './components/Input'
 import { Route, Routes } from 'react-router-dom'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
@@ -14,17 +13,20 @@ import ActiveTheater from './pages/ActiveTheater'
 import ChatBox from './components/ChatBox'
 import SchedulePage from './pages/SchedulePage'
 import UploadMovieModal from './pages/movieModal/UploadMovieModal'
+import CreateTheater from './pages/CreateTheater'
+import ProtectedRoute from './hooks/ProtectedRoutes'
+import MoviePage from './pages/MoviePage'
 
 export default function App() {
-  const dispatch=useDispatch()
-  const {loading}=useSelector((state)=>state.auth)
+  const dispatch = useDispatch()
+  const { loading } = useSelector((state) => state.auth)
 
-  useEffect(()=>{
-    const fetchUser=async ()=>{
+  useEffect(() => {
+    const fetchUser = async () => {
       dispatch(setLoading(true))
       try {
-        const res=await axios.get("http://localhost:3000/api/auth/me",{
-          withCredentials:true
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+          withCredentials: true
         });
         dispatch(setUser(res.data.user))
       } catch (error) {
@@ -33,26 +35,31 @@ export default function App() {
     }
 
     fetchUser()
-  },[dispatch])
+  }, [dispatch])
 
-  if(loading){
+  if (loading) {
     return <p>Loading...</p>
   }
 
   return (
     <div>
       <Routes>
-        <Route path='/signup' element={<SignupPage/>} />
-        <Route path='/login' element={<LoginPage/>} />
-        <Route path='/' element={<HomePage/>} />
-        <Route path='/theater' element={<Theater/>} />
-        <Route path='/schedule' element={<SchedulePage/>} />
-        <Route path='/squad' element={<TheSquad/>} />
-        <Route path='/join-theater' element={<JoinTheater/>} />
-        <Route path='/active-theater' element={<ActiveTheater/>} />
-        <Route path="/chatbox" element={<ChatBox />} />
+        {/* Public routes */}
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<HomePage />} />
 
+        {/* Protected routes */}
+        <Route path="/theater" element={<ProtectedRoute><Theater /></ProtectedRoute>}/>
+        <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>}/>
+        <Route path="/squad" element={<ProtectedRoute><TheSquad /></ProtectedRoute>}/>
+        <Route path="/join-theater" element={<ProtectedRoute><JoinTheater /></ProtectedRoute>}/>
+        <Route path="/create-theater" element={<ProtectedRoute><CreateTheater /></ProtectedRoute>}/>
+        <Route path="/active-theater/:code" element={<ProtectedRoute><ActiveTheater /></ProtectedRoute>}/>
+        <Route path="/chatbox" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
+        <Route path="/movies" element={<ProtectedRoute><MoviePage /></ProtectedRoute>} />
 
+        {/* Test route (could be protected too if needed) */}
         <Route path="/test" element={<UploadMovieModal />} />
       </Routes>
     </div>

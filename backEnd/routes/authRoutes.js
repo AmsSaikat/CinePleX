@@ -9,7 +9,7 @@ authRouter.get("/me",isAuth,checkAuth)
 
 authRouter.post("/signup",signup)
 authRouter.post("/login",login)
-authRouter.post("/logout",logout)
+authRouter.get("/logout",logout)
 
 
 

@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import authRouter from "./routes/authRoutes.js"
+import theaterRoute from "./routes/theaterRoutes.js"
 import { connectDB } from "./config/connectDB.js"
 import cors from 'cors'
 import http from 'http'
@@ -22,6 +23,7 @@ app.use(cors({
 }));
 
 app.use("/api/auth",authRouter)
+app.use("/api/theater",theaterRoute)
 
 const server=http.createServer(app)
 setupChatSocket(server)
