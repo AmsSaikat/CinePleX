@@ -17,8 +17,15 @@ const app=express()
 app.use(express.json())
 app.use(cookieParser())
 
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.NETLIFY_URL
+];
+
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: allowedOrigins,
   credentials: true,               
 }));
 
