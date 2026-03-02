@@ -156,7 +156,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <style jsx>{`
+      <style>{`
         .text-glow {
           text-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
         }

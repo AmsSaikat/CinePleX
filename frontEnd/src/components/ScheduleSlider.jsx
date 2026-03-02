@@ -112,7 +112,7 @@ export default function ScheduleSlider() {
         </button>
       </Swiper>
 
-      <style jsx global>{`
+      <style>{`
         .swiper-pagination-bullet { background: white !important; opacity: 0.3; }
         .swiper-pagination-bullet-active { background: #22d3ee !important; opacity: 1; width: 24px !important; border-radius: 4px !important; transition: all 0.3s !important; }
       `}</style>

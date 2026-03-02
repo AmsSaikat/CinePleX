@@ -99,7 +99,7 @@ export default function Slider() {
         ))}
       </Swiper>
 
-      <style jsx global>{`
+      <style>{`
         .premium-swiper .swiper-button-next, 
         .premium-swiper .swiper-button-prev {
           color: white !important;
