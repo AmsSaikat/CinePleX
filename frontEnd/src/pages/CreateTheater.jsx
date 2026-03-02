@@ -20,7 +20,7 @@ export default function CreateTheater() {
       setLoading(true)
 
       const result = await axios.post(
-        "http://localhost:3000/api/theater/create-theater",
+        import.meta.env.VITE_API_URL+"theater/create-theater",
         {
           title: data.theaterName,
         },

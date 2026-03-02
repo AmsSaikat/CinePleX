@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MdSend, MdFace, MdPeople } from "react-icons/md";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 
-const socket = io("http://localhost:3000");
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 // Premium Time Formatter
 function timeAgo(timestamp) {
@@ -28,7 +28,7 @@ function ChatBubble({ user, msg, isOwn, time }) {
       
       <div className={`relative px-4 py-2.5 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-lg
         ${isOwn 
-          ? "bg-gradient-to-br from-cyan-600 to-blue-700 text-white rounded-tr-none" 
+          ? "bg-linear-to-br from-cyan-600 to-blue-700 text-white rounded-tr-none" 
           : "bg-zinc-800/80 backdrop-blur-md text-zinc-200 border border-white/5 rounded-tl-none"}
       `}>
         {msg}
@@ -112,7 +112,7 @@ export default function ChatBox() {
             key="chat"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-[600px] rounded-[2.5rem] bg-zinc-900/40 backdrop-blur-xl border border-white/5 overflow-hidden shadow-2xl"
+            className="flex flex-col h-150 rounded-[2.5rem] bg-zinc-900/40 backdrop-blur-xl border border-white/5 overflow-hidden shadow-2xl"
           >
             {/* Header */}
             <div className="px-6 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">

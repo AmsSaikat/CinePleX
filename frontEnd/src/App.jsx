@@ -25,7 +25,7 @@ export default function App() {
     const fetchUser = async () => {
       dispatch(setLoading(true))
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}auth/me`, {
           withCredentials: true
         });
         dispatch(setUser(res.data.user))

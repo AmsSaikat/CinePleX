@@ -24,7 +24,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
+    <nav className={`fixed top-0 z-100 w-full transition-all duration-500 ${
       isScrolled 
         ? 'h-20 bg-[#020617]/80 backdrop-blur-2xl border-b border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]' 
         : 'h-24 bg-transparent'
@@ -70,14 +70,14 @@ export default function Navbar() {
             })}
           </ul>
 
-          <div className="h-8 w-[1px] bg-white/10 mx-4" />
+          <div className="h-8 w-px bg-white/10 mx-4" />
 
           {/* SQUAD BUTTON */}
           <button 
             onClick={() => navigate('/squad')}
             className="group relative px-6 py-2.5 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden transition-all hover:border-cyan-500/50"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <span className="relative z-10 text-[11px] font-black text-cyan-400 tracking-tighter flex items-center gap-2">
               <Users size={14} /> #TheSQUAD
             </span>
@@ -100,7 +100,7 @@ export default function Navbar() {
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
-            className="fixed inset-0 z-[90] bg-[#020617] p-10 flex flex-col pt-32 gap-8 md:hidden"
+            className="fixed inset-0 z-90 bg-[#020617] p-10 flex flex-col pt-32 gap-8 md:hidden"
           >
              {navLinks.map((link) => (
                <div 
