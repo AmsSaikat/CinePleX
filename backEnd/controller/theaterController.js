@@ -49,7 +49,7 @@ export const getAllTheaters = async (req, res) => {
   try {
     const theaters = await Theater.find()
       .populate("owner", "name email")
-      .populate("collection");
+      .populate("collections");
 
     res.status(200).json({
       success: true,
@@ -70,7 +70,7 @@ export const getTheaterById = async (req, res) => {
   try {
     const theater = await Theater.findById(req.params.id)
       .populate("owner", "name email")
-      .populate("collection");
+      .populate("collections");
 
     if (!theater) {
       return res.status(404).json({
@@ -99,7 +99,7 @@ export const getMyTheaters = async (req, res) => {
   try {
     const theaters = await Theater.find({
       owner: req.userId,
-    }).populate("collection");
+    }).populate("collections");
 
     res.status(200).json({
       success: true,
@@ -187,6 +187,62 @@ export const deleteTheater = async (req, res) => {
       success: false,
       message: "Failed to delete theater",
       error: error.message,
+    });
+  }
+};
+
+
+
+/* ================= JOIN THEATER ================= */
+export const joinTheater = async (req, res) => {
+  try {
+    let { code } = req.body;
+
+    code = code.toUpperCase();
+
+    if (code.length === 6) {
+      code = `${code.slice(0,3)}-${code.slice(3)}`;
+    }
+
+    const theater = await Theater.findOne({ code });
+
+    if (!theater) {
+      return res.status(404).json({
+        success: false,
+        message: "Theater not found"
+      });
+    }
+
+    // prevent duplicate join
+    if (theater.audience.some(id => id.toString() === req.userId.toString())) {
+      return res.status(200).json({
+        success: true,
+        message: "Already joined",
+        data:theater
+      });
+    }
+
+    // check max capacity
+    if (theater.audience.length >= theater.maxAudience) {
+      return res.status(400).json({
+        success: false,
+        message: "Theater is full"
+      });
+    }
+
+    theater.audience.push(req.userId);
+    await theater.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Joined successfully",
+      data: theater
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };

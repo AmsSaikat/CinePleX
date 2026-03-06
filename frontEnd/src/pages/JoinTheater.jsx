@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { 
-  Ticket, Users, PlayCircle, ShieldCheck, 
-  ChevronRight, Cpu, Radio, Globe, ClipboardPaste, Sparkles 
-} from "lucide-react";
+import axios from "axios";
+import { Ticket, Users, PlayCircle, ShieldCheck, ChevronRight, Cpu, Radio, Globe, ClipboardPaste, Sparkles } from "lucide-react";
 import Navbar from "../components/Navbar";
 
 export default function JoinTheater() {
@@ -20,16 +18,46 @@ export default function JoinTheater() {
 
   // Auto-Paste Functionality
   const handlePaste = async () => {
+  try {
+    setIsPasting(true);
+
+    const text = await navigator.clipboard.readText();
+
+    const cleaned = text
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0,6);
+
+    setCode(cleaned);
+
+    setTimeout(() => setIsPasting(false), 600);
+
+  } catch (err) {
+    console.error("Clipboard error:", err);
+    setIsPasting(false);
+  }
+};
+
+  const handleJoin = async (e) => {
+    if (e) e.preventDefault();
+
+    if (code.length !== 6) return;
+
     try {
-      setIsPasting(true);
-      const text = await navigator.clipboard.readText();
-      // Clean the string: uppercase, remove spaces, limit to 6
-      const cleaned = text.toUpperCase().trim().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-      setCode(cleaned);
-      setTimeout(() => setIsPasting(false), 600);
-    } catch (err) {
-      console.error("Failed to read clipboard:", err);
-      setIsPasting(false);
+      // Changed to JSON object instead of FormData for standard Axios/Express compatibility
+      const res = await axios.post(
+        import.meta.env.VITE_API_URL + `theater/join-theater`,
+        { code },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        navigate(`/active-theater/${res.data.data.code}`);
+      }
+    } catch (error) {
+  const data = error.response?.data;
+  const msg = data?.message || data?.msg || error.message;
+  console.log(msg);
     }
   };
 
@@ -44,7 +72,6 @@ export default function JoinTheater() {
       </div>
 
       <main className="relative z-10 pt-32 pb-20 px-6 max-w-7xl mx-auto">
-        
         {/* --- HERO SECTION --- */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -63,7 +90,6 @@ export default function JoinTheater() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
-          
           {/* --- ACCESS CARD --- */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -79,6 +105,7 @@ export default function JoinTheater() {
                   <p className="text-zinc-500 text-[10px] font-black tracking-widest uppercase">Input 6-Digit Protocol</p>
                 </div>
                 <button 
+                  type="button"
                   onClick={handlePaste}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all text-xs font-bold"
                 >
@@ -87,35 +114,39 @@ export default function JoinTheater() {
                 </button>
               </div>
 
-              {/* SEGMENTED INPUT DISPLAY */}
-              <div className="relative space-y-8">
-                <div className="flex justify-between gap-2 md:gap-4">
-                  {[0, 1, 2, 3, 4, 5].map((index) => (
-                    <div 
-                      key={index} 
-                      className={`w-full h-16 md:h-20 rounded-2xl bg-black/40 border transition-all duration-500 flex items-center justify-center text-2xl md:text-3xl font-mono
-                        ${code[index] ? "border-cyan-500 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)] scale-105" : "border-white/5 text-zinc-800"}
-                      `}
-                    >
-                      {code[index] || "•"}
-                    </div>
-                  ))}
-                </div>
+              {/* FIXED INPUT AREA */}
+              <form onSubmit={handleJoin} className="relative space-y-8">
                 
-                {/* REAL HIDDEN INPUT */}
-                <input 
-                  type="text" 
-                  value={code}
-                  onChange={handleChange}
-                  maxLength={6}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-text z-30"
-                  autoFocus
-                />
+                {/* Wrapped Input and Boxes together to prevent Z-index overflow */}
+                <div className="relative group/input">
+                  <div className="flex justify-between gap-2 md:gap-4 pointer-events-none relative z-10">
+                    {[0, 1, 2, 3, 4, 5].map((index) => (
+                      <div 
+                        key={index} 
+                        className={`w-full h-16 md:h-20 rounded-2xl bg-black/40 border transition-all duration-500 flex items-center justify-center text-2xl md:text-3xl font-mono
+                          ${code[index] ? "border-cyan-500 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)] scale-105" : "border-white/5 text-zinc-800"}
+                        `}
+                      >
+                        {code[index] || "•"}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Input now only covers the "boxes" container height */}
+                  <input 
+                    type="text" 
+                    value={code}
+                    onChange={handleChange}
+                    maxLength={6}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-text z-20"
+                    autoFocus
+                  />
+                </div>
 
                 <button 
-                  onClick={() => navigate('/active-theater')}
+                  type="submit"
                   disabled={code.length < 6}
-                  className="w-full py-5 bg-white text-black font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-cyan-500 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-10 disabled:grayscale group/btn overflow-hidden relative"
+                  className="w-full py-5 bg-white text-black font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-cyan-500 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-10 disabled:grayscale group/btn overflow-hidden relative z-30"
                 >
                   <span className="relative z-10 flex items-center gap-2 uppercase tracking-tighter">
                     {code.length === 6 ? "INITIALIZE LINK" : "AWAITING PROTOCOL"}
@@ -128,7 +159,7 @@ export default function JoinTheater() {
                     />
                   )}
                 </button>
-              </div>
+              </form>
 
               <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/5 pt-8 opacity-40">
                 <MiniInfo icon={<ShieldCheck size={14} />} label="ENCRYPTED" />
@@ -145,7 +176,6 @@ export default function JoinTheater() {
             className="space-y-6"
           >
             <div className="rounded-[2.5rem] bg-zinc-900/40 backdrop-blur-md border border-white/5 overflow-hidden shadow-2xl relative">
-              {/* Ticket Top Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#020617] rounded-b-3xl border-x border-b border-white/5" />
               
               <div className="p-10 pt-14 space-y-8">
@@ -154,7 +184,7 @@ export default function JoinTheater() {
                       <p className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.2em]">Live Session Found</p>
                       <h3 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-white">Interstellar</h3>
                    </div>
-                   <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform">
+                   <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan-500">
                       <PlayCircle size={32} />
                    </div>
                 </div>
@@ -177,7 +207,6 @@ export default function JoinTheater() {
               </div>
             </div>
 
-            {/* QUICK FEATURES HUD */}
             <div className="grid grid-cols-3 gap-3">
                <HUDItem icon={<Ticket />} text="AD FREE" />
                <HUDItem icon={<Users />} text="VOICE" />
@@ -211,8 +240,8 @@ function MiniInfo({ icon, label }) {
 
 function HUDItem({ icon, text }) {
   return (
-    <div className="p-4 rounded-2xl bg-zinc-900/40 border border-white/5 flex flex-col items-center gap-2 group hover:border-cyan-500/30 transition-all">
-      <div className="text-zinc-600 group-hover:text-cyan-400 transition-colors">{React.cloneElement(icon, { size: 16 })}</div>
+    <div className="p-4 rounded-2xl bg-zinc-900/40 border border-white/5 flex flex-col items-center gap-2">
+      <div className="text-zinc-600">{React.cloneElement(icon, { size: 16 })}</div>
       <span className="text-[9px] font-black text-zinc-500 uppercase tracking-tighter">{text}</span>
     </div>
   );

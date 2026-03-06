@@ -18,10 +18,24 @@ const theaterSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    code:{
-      type:String,
-      required:true
-    }
+
+    code: {
+      type: String,
+      required: true,
+      unique: true  
+    },
+
+    maxAudience: {
+      type: Number,
+      default: 10
+    },
+
+    audience: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   {
     timestamps: true,
