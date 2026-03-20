@@ -1,13 +1,16 @@
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import Navbar from "../components/Navbar"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom" 
 import axios from "axios"
+import { useDispatch } from "react-redux"
+import { setTheater } from "../redux/slices/theaterSlice"
 
 export default function CreateTheater() {
   const navigate = useNavigate()
   const [generatedCode, setGeneratedCode] = useState(null)
   const [loading, setLoading] = useState(false)
+  const dispatch=useDispatch()
 
   const {
     register,
@@ -29,6 +32,15 @@ export default function CreateTheater() {
 
       const code = result.data.data.code
       setGeneratedCode(code)
+
+      // 2️⃣ Fetch populated theater
+          const theaterRes = await axios.get(
+            import.meta.env.VITE_API_URL + `theater/get-theater/code/${result.data?.data?.code}`, // or /:id if you have ID
+            { withCredentials: true }
+          );
+      
+          // 3️⃣ Store populated theater in Redux
+          dispatch(setTheater(theaterRes.data.data));
 
       // Small delay so user sees the code before redirect
       setTimeout(() => {

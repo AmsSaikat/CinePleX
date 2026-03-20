@@ -7,6 +7,7 @@ import { connectDB } from "./config/connectDB.js"
 import cors from 'cors'
 import http from 'http'
 import setupChatSocket from "./config/socketConn.js"
+import setupAdminSocket from "./config/adminSocket.js"
 
 
 
@@ -34,7 +35,7 @@ app.use("/api/theater",theaterRoute)
 
 const server=http.createServer(app)
 setupChatSocket(server)
-
+setupAdminSocket(server)
 
 
 

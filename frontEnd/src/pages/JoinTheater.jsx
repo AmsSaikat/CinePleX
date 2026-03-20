@@ -4,11 +4,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Ticket, Users, PlayCircle, ShieldCheck, ChevronRight, Cpu, Radio, Globe, ClipboardPaste, Sparkles } from "lucide-react";
 import Navbar from "../components/Navbar";
+import { useDispatch } from "react-redux";
+import { setTheater } from "../redux/slices/theaterSlice";
 
 export default function JoinTheater() {
   const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [isPasting, setIsPasting] = useState(false);
+  const dispatch=useDispatch()
 
   // Handle Input logic
   const handleChange = (e) => {
@@ -39,27 +42,34 @@ export default function JoinTheater() {
 };
 
   const handleJoin = async (e) => {
-    if (e) e.preventDefault();
+  if (e) e.preventDefault();
+  if (code.length !== 6) return;
 
-    if (code.length !== 6) return;
+  try {
+    // 1️⃣ Join theater (just updates DB)
+    const res=await axios.post(
+      import.meta.env.VITE_API_URL + `theater/join-theater`,
+      { code },
+      { withCredentials: true }
+    );
 
-    try {
-      // Changed to JSON object instead of FormData for standard Axios/Express compatibility
-      const res = await axios.post(
-        import.meta.env.VITE_API_URL + `theater/join-theater`,
-        { code },
-        { withCredentials: true }
-      );
+    // 2️⃣ Fetch populated theater
+    const theaterRes = await axios.get(
+      import.meta.env.VITE_API_URL + `theater/get-theater/code/${res.data?.data?.code}`, // or /:id if you have ID
+      { withCredentials: true }
+    );
 
-      if (res.data.success) {
-        navigate(`/active-theater/${res.data.data.code}`);
-      }
-    } catch (error) {
-  const data = error.response?.data;
-  const msg = data?.message || data?.msg || error.message;
-  console.log(msg);
-    }
-  };
+    // 3️⃣ Store populated theater in Redux
+    dispatch(setTheater(theaterRes.data.data));
+
+    // 4️⃣ Navigate to active theater
+    navigate(`/active-theater/${res.data.data.code}`);
+  } catch (error) {
+    const data = error.response?.data;
+    const msg = data?.message || data?.msg || error.message;
+    console.log(msg);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-cyan-500/30 overflow-x-hidden">

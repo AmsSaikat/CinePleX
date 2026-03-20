@@ -8,6 +8,10 @@ import Navbar from "../components/Navbar";
 import ChatBox from "../components/ChatBox";
 import UploadMovieModal from "../pages/movieModal/UploadMovieModal";
 import TheaterPlayer from "../components/TheaterPlayer";
+import { useDispatch, useSelector } from "react-redux";
+import { setTheater } from "../redux/slices/theaterSlice";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 const DEMO_HLS = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
@@ -16,6 +20,29 @@ export default function ActiveTheater() {
   const [movieLoaded, setMovieLoaded] = useState(false);
   const [movieUrl, setMovieUrl] = useState(null);
   const [waitingUser, setWaitingUser] = useState(null);
+  const { code } = useParams();
+  const dispatch = useDispatch();
+
+  const {theater} = useSelector((state)=>state.theater)
+  console.log(theater)
+
+  useEffect(() => {
+    const fetchTheater = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}theater/get-theater/code/${code}`,
+          { withCredentials: true }
+        );
+
+        dispatch(setTheater(res.data.data));
+      } catch (error) {
+        console.log("Failed to fetch theater",error.response?.data || error.message);
+      }
+    };
+
+    if (code) fetchTheater();
+  }, [code, dispatch]);
+
 
   const handleMovieUploaded = (url) => {
     setMovieUrl(url);
@@ -36,13 +63,13 @@ export default function ActiveTheater() {
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
                 <Radio size={12} /> Live Theater
               </span>
-              <span className="text-zinc-600 text-xs font-mono uppercase tracking-tighter">Room ID: AX9-Q2F</span>
+              <span className="text-zinc-600 text-xs font-mono uppercase tracking-tighter">Room ID: {theater?.code}</span>
             </div>
             <h1 className="text-4xl font-black italic tracking-tighter uppercase">
               {movieLoaded ? "Interstellar (2014)" : "Waiting for Broadcast..."}
             </h1>
             <p className="text-zinc-500 text-sm flex items-center gap-2 font-light">
-              Secured by <span className="text-cyan-400 font-bold uppercase tracking-widest text-xs">Host: Saikat</span>
+              Secured by <span className="text-cyan-400 font-bold uppercase tracking-widest text-xs">Host: {theater?.owner?.name} </span>
             </p>
           </div>
 
@@ -110,7 +137,7 @@ export default function ActiveTheater() {
                 </div>
                 <div className="flex items-center gap-2">
                    <Users size={16} className="text-cyan-500" />
-                   <span className="text-xs font-mono text-zinc-400">12 Connected</span>
+                   <span className="text-xs font-mono text-zinc-400">{theater?.audience?.length || 0} Connected</span>
                 </div>
             </div>
           </div>
@@ -139,15 +166,17 @@ export default function ActiveTheater() {
 
               {/* WATCHERS MINI-LIST */}
               <div className="pt-4 space-y-3 border-t border-white/5">
-                {["X", "Y", "Z"].map((name) => (
-                  <div key={name} className="flex items-center gap-3 group">
-                    <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-[10px] font-black text-cyan-500 group-hover:bg-cyan-500 group-hover:text-black transition-all">
-                      {name}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-tighter">Operator {name}</span>
-                    <div className="ml-auto w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]" />
-                  </div>
-                ))}
+                 {[theater?.owner, ...(theater?.moderators || [])].map((user) => (
+                   <div key={user?._id} className="flex items-center gap-3 group">
+                     <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-[10px] font-black text-cyan-500 group-hover:bg-cyan-500 group-hover:text-black transition-all">
+                       {user?.name?.charAt(0) || "?"}
+                     </div>
+                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-tighter">
+                        {user === theater?.owner ? "Owner" : "Moderator"} {user?.name}
+                     </span>
+                     <div className="ml-auto w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]" />
+                   </div>
+                  ))}
               </div>
             </div>
 
