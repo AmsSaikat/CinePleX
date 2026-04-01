@@ -1,136 +1,205 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {Settings,Crown,Shield,UserX,Ban,X} from "lucide-react";
+import { Settings, Crown, Shield, UserX, Ban, X } from "lucide-react";
+import { io } from "socket.io-client";
 
-export default function AdminModeratorPanel() {
-  const [open, setOpen] = useState(true);
+// 🔌 Connect to backend Socket (port 3000)
+const socket = io("http://localhost:3000", {
+  transports: ["websocket"],
+});
 
-  const [users, setUsers] = useState([
-    { _id: "1", name: "Saikat", role: "owner" },
-    { _id: "2", name: "X", role: "user" },
-    { _id: "3", name: "Y", role: "moderator" },
-    { _id: "4", name: "Z", role: "user" },
-  ]);
+export default function AdminModeratorPanel({ theater, user }) {
+  const [open, setOpen] = useState(false);
+  const [showButton, setShowButton] = useState(true);
 
-  const currentUserId = "1";
+  const currentUserId = user?._id;
 
-  const currentUser = users.find(u => u._id === currentUserId);
-  const isOwner = currentUser?.role === "owner";
-  const isModerator = currentUser?.role === "moderator";
+  // ================= REMOTE USERS STATE =================
+  const [users, setUsers] = useState([]);
 
-  /* ================= ACTIONS ================= */
+  // ================= NOTIFICATIONS STATE =================
+  const [notifications, setNotifications] = useState([]);
 
-  const kickUser = (id) => {
-    setUsers(prev => prev.filter(u => u._id !== id));
+  const addNotification = (message) => {
+    const id = Date.now();
+    setNotifications((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }, 3000);
   };
 
-  const banUser = (id) => {
-    setUsers(prev => prev.filter(u => u._id !== id));
-    console.log("User banned for few minutes:", id);
+  // ================= JOIN THEATER =================
+  useEffect(() => {
+    if (!theater || !user) return;
+
+    socket.emit("join-theater", {
+      theaterId: theater._id,
+      user: {
+        userId: currentUserId,
+        name: user.name,
+        role: user._id === theater.owner?._id ? "host" : "viewer",
+      },
+    });
+
+    socket.on("theater-users", (updatedUsers) => {
+      setUsers(updatedUsers);
+    });
+
+    // Personal kick notification
+    socket.on("kicked", () => {
+      addNotification("You were kicked from the theater");
+    });
+
+    // Admin action notifications
+    socket.on("user-kicked", (data) => {
+      addNotification(`${data.name} was kicked`);
+    });
+    socket.on("user-banned", (data) => {
+      addNotification(`${data.name} was banned`);
+    });
+    socket.on("host-transferred", (data) => {
+      addNotification(`${data.name} is now the host`);
+    });
+    socket.on("moderator-assigned", (data) => {
+      addNotification(`${data.name} is now a moderator`);
+    });
+
+    return () => {
+      socket.off("theater-users");
+      socket.off("kicked");
+      socket.off("user-kicked");
+      socket.off("user-banned");
+      socket.off("host-transferred");
+      socket.off("moderator-assigned");
+    };
+  }, [theater, user]);
+
+  // ================= ROLE CHECK =================
+  const me = users.find((u) => u.socketId === socket.id) || {};
+  const isOwner = me.role === "host";
+  const isModerator = me.role === "moderator";
+
+  // ================= DEDUPLICATE USERS =================
+  const uniqueUsers = Array.from(new Map(users.map(u => [u.socketId, u])).values());
+
+  // ================= SOCKET ACTIONS =================
+  const kickUser = (socketId) => {
+    socket.emit("kick-user", { theaterId: theater._id, targetSocketId: socketId });
+  };
+  const banUser = (socketId) => {
+    socket.emit("kick-user", { theaterId: theater._id, targetSocketId: socketId });
+  };
+  const transferHost = (socketId) => {
+    socket.emit("transfer-host", { theaterId: theater._id, targetSocketId: socketId });
+  };
+  const toggleModerator = (socketId) => {
+    socket.emit("assign-moderator", { theaterId: theater._id, targetSocketId: socketId });
   };
 
-  const transferHost = (id) => {
-    setUsers(prev =>
-      prev.map(u => ({
-        ...u,
-        role:
-          u._id === id
-            ? "owner"
-            : u.role === "owner"
-            ? "user"
-            : u.role,
-      }))
-    );
-  };
+  // ================= AUTO HIDE SETTINGS BUTTON =================
+  useEffect(() => {
+    let timer;
+    const resetTimer = () => {
+      setShowButton(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setShowButton(false), 3000);
+    };
+    window.addEventListener("mousemove", resetTimer);
+    resetTimer();
+    return () => {
+      window.removeEventListener("mousemove", resetTimer);
+      clearTimeout(timer);
+    };
+  }, []);
 
-  const toggleModerator = (id) => {
-    setUsers(prev =>
-      prev.map(u =>
-        u._id === id
-          ? { ...u, role: u.role === "moderator" ? "user" : "moderator" }
-          : u
-      )
-    );
-  };
-
-  /* ================= UI ================= */
-
+  // ================= UI =================
   return (
     <>
-      {/* Floating Button */}
+      {/* SETTINGS BUTTON */}
       <motion.button
         onClick={() => setOpen(true)}
-        className="absolute top-4 right-4 z-9999 bg-black/60 p-3 rounded-full border border-cyan-400/30"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: showButton ? 1 : 0 }}
+        className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-black/70 p-3 rounded-full border border-cyan-400/30 transition"
       >
         <Settings className="text-cyan-400" />
       </motion.button>
 
+      {/* NOTIFICATIONS */}
+      <div className="absolute top-4 right-12.5 z-50 flex flex-col gap-2">
+        <AnimatePresence>
+          {notifications.map((n) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-cyan-500 text-black px-4 py-2 rounded-lg shadow-lg"
+            >
+              {n.message}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* CONTROL PANEL */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ x: 300 }}
+            initial={{ x: 320 }}
             animate={{ x: 0 }}
-            exit={{ x: 300 }}
-            className="absolute top-0 right-0 h-full w-85 bg-[#0b1320]/95 backdrop-blur-xl border-l border-cyan-500/20 z-9999 p-5"
+            exit={{ x: 320 }}
+            transition={{ type: "spring", stiffness: 260, damping: 25 }}
+            className="absolute top-0 right-0 h-full w-85 bg-[#0b1320]/95 backdrop-blur-xl border-l border-cyan-500/20 z-50 p-5"
           >
             {/* HEADER */}
-            <div className="flex justify-between mb-4">
-              <h2 className="text-white font-semibold flex gap-2">
-                <Settings size={18}/> Control Panel
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-white font-semibold flex gap-2 items-center">
+                <Settings size={18} /> Control Panel
               </h2>
               <button onClick={() => setOpen(false)}>
-                <X />
+                <X className="text-white/70 hover:text-white" />
               </button>
             </div>
 
-            {/* USERS */}
+            {/* USERS LIST */}
             <div className="space-y-2">
-              {users.map(user => {
-                const isSelf = user._id === currentUserId;
+              {uniqueUsers.map((u) => {
+                const key = `${u.socketId}-${u.userId || u.name}`;
+                const isSelf = u.socketId === socket.id;
 
                 return (
-                  <div
-                    key={user._id}
-                    className="flex justify-between items-center bg-[#101a2f] px-3 py-2 rounded-xl"
-                  >
+                  <div key={key} className="flex justify-between items-center bg-[#101a2f] px-3 py-2 rounded-xl">
                     {/* LEFT */}
-                    <div className="flex items-center gap-2">
-                      <span>{user.name}</span>
-
-                      {user.role === "owner" && <Crown size={14} className="text-yellow-400"/>}
-                      {user.role === "moderator" && <Shield size={14} className="text-cyan-400"/>}
+                    <div className="flex items-center gap-2 text-white">
+                      <span>{u.name}</span>
+                      {u.role === "host" && <Crown size={14} className="text-yellow-400" />}
+                      {u.role === "moderator" && <Shield size={14} className="text-cyan-400" />}
                     </div>
 
                     {/* RIGHT ACTIONS */}
                     {!isSelf && (
                       <div className="flex gap-2">
-
-                        {/* Kick (owner + mod) */}
                         {(isOwner || isModerator) && (
-                          <button onClick={() => kickUser(user._id)}>
-                            <UserX size={16} className="text-red-400"/>
+                          <button onClick={() => kickUser(u.socketId)}>
+                            <UserX size={16} className="text-red-400 hover:scale-110 transition" />
                           </button>
                         )}
 
-                        {/* Ban (owner only) */}
                         {isOwner && (
-                          <button onClick={() => banUser(user._id)}>
-                            <Ban size={16} className="text-orange-400"/>
-                          </button>
-                        )}
+                          <>
+                            <button onClick={() => banUser(u.socketId)}>
+                              <Ban size={16} className="text-orange-400 hover:scale-110 transition" />
+                            </button>
 
-                        {/* Make/Remove Moderator */}
-                        {isOwner && (
-                          <button onClick={() => toggleModerator(user._id)}>
-                            <Shield size={16} className="text-cyan-400"/>
-                          </button>
-                        )}
+                            <button onClick={() => toggleModerator(u.socketId)}>
+                              <Shield size={16} className="text-cyan-400 hover:scale-110 transition" />
+                            </button>
 
-                        {/* Transfer Host */}
-                        {isOwner && (
-                          <button onClick={() => transferHost(user._id)}>
-                            <Crown size={16} className="text-yellow-400"/>
-                          </button>
+                            <button onClick={() => transferHost(u.socketId)}>
+                              <Crown size={16} className="text-yellow-400 hover:scale-110 transition" />
+                            </button>
+                          </>
                         )}
                       </div>
                     )}

@@ -16,6 +16,8 @@ import UploadMovieModal from './pages/movieModal/UploadMovieModal'
 import CreateTheater from './pages/CreateTheater'
 import ProtectedRoute from './hooks/ProtectedRoutes'
 import MoviePage from './pages/MoviePage'
+import Profile from './pages/Profile'
+import UpdateProfile from './pages/UpdateProfile'
 
 export default function App() {
   const dispatch = useDispatch()
@@ -58,6 +60,8 @@ export default function App() {
         <Route path="/active-theater/:code" element={<ProtectedRoute><ActiveTheater /></ProtectedRoute>}/>
         <Route path="/chatbox" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
         <Route path="/movies" element={<ProtectedRoute><MoviePage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
+        <Route path="/update-profile" element={<ProtectedRoute><UpdateProfile/></ProtectedRoute>} />
 
         {/* Test route (could be protected too if needed) */}
         <Route path="/test" element={<UploadMovieModal />} />

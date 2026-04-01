@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setTheater } from "../redux/slices/theaterSlice";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import AdminModeratorPanel from "../components/AdminModeratorPannel";
 
 const DEMO_HLS = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
@@ -24,7 +25,9 @@ export default function ActiveTheater() {
   const dispatch = useDispatch();
 
   const {theater} = useSelector((state)=>state.theater)
-  console.log(theater)
+  const {user}=useSelector((state)=>state.auth)
+  console.log("Theater:", theater)
+  console.log("User:", user)
 
   useEffect(() => {
     const fetchTheater = async () => {
@@ -106,6 +109,7 @@ export default function ActiveTheater() {
                   onBufferEnd={() => setWaitingUser(null)}
                 />
               )}
+              <AdminModeratorPanel theater={theater} user={user} />
               
               {/* Buffer Warning HUD */}
               <AnimatePresence>
