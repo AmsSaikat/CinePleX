@@ -1,56 +1,97 @@
-import { Server } from "socket.io";
+const theaters = {}; 
+// { theaterId: [ { socketId, userId, name, role } ] }
 
-const setupAdminSocket = (server) => {
-  const allowedOrigins = [
-    process.env.CLIENT_URL,
-    process.env.NETLIFY_URL
-  ];
+export const adminSocketHandler = (io, socket) => {
+  console.log("Admin socket connected:", socket.id);
 
-  const io = new Server(server, {
-    cors: {
-      origin: allowedOrigins,
-      methods: ["GET", "POST"]
+  // 🔥 JOIN THEATER
+  socket.on("join-theater", ({ theaterId, user }) => {
+    socket.join(theaterId);
+
+    socket.data = {
+      theaterId,
+      ...user,
+    };
+
+    if (!theaters[theaterId]) {
+      theaters[theaterId] = [];
+    }
+
+    theaters[theaterId].push({
+      socketId: socket.id,
+      ...user,
+    });
+
+    io.to(theaterId).emit("theater-users", theaters[theaterId]);
+  });
+
+  // ❌ KICK USER
+  socket.on("kick-user", ({ theaterId, targetSocketId }) => {
+    const requester = socket.data;
+
+    if (requester.role !== "host" && requester.role !== "moderator") return;
+
+    const targetSocket = io.sockets.sockets.get(targetSocketId);
+
+    if (targetSocket) {
+      targetSocket.leave(theaterId);
+      targetSocket.emit("kicked");
+
+      theaters[theaterId] = theaters[theaterId].filter(
+        (u) => u.socketId !== targetSocketId
+      );
+
+      io.to(theaterId).emit("theater-users", theaters[theaterId]);
     }
   });
 
-  io.on("connection", (socket) => {
-    console.log("Host/Admin socket connected:", socket.id);
+  // 👑 TRANSFER HOST
+  socket.on("transfer-host", ({ theaterId, targetSocketId }) => {
+    const requester = socket.data;
 
-    // Join theater room
-    socket.on("joinTheaterRoom", (code) => {
-      socket.join(code);
-      console.log(`Socket ${socket.id} joined theater ${code}`);
+    if (requester.role !== "host") return;
+
+    theaters[theaterId] = theaters[theaterId].map((user) => {
+      if (user.socketId === socket.id) {
+        return { ...user, role: "viewer" };
+      }
+      if (user.socketId === targetSocketId) {
+        return { ...user, role: "host" };
+      }
+      return user;
     });
 
-    // Host transfers host
-    socket.on("host:transfer", ({ theaterCode, newHostId }) => {
-      io.to(theaterCode).emit("host:transferred", { newHostId });
+    io.to(theaterId).emit("theater-users", theaters[theaterId]);
+  });
+
+  // 🛡️ ASSIGN MODERATOR
+  socket.on("assign-moderator", ({ theaterId, targetSocketId }) => {
+    const requester = socket.data;
+
+    if (requester.role !== "host") return;
+
+    theaters[theaterId] = theaters[theaterId].map((user) => {
+      if (user.socketId === targetSocketId) {
+        return { ...user, role: "moderator" };
+      }
+      return user;
     });
 
-    // Assign/remove moderators
-    socket.on("moderator:update", ({ theaterCode, moderators }) => {
-      io.to(theaterCode).emit("moderator:updated", { moderators });
-    });
+    io.to(theaterId).emit("theater-users", theaters[theaterId]);
+  });
 
-    // Kick user
-    socket.on("user:kicked", ({ theaterCode, userId }) => {
-      io.to(theaterCode).emit("user:kicked", { userId });
-    });
+  // 🔌 DISCONNECT
+  socket.on("disconnect", () => {
+    const { theaterId } = socket.data || {};
 
-    // Lock / unlock theater
-    socket.on("theater:lock", ({ theaterCode, isLocked }) => {
-      io.to(theaterCode).emit("theater:lock", { isLocked });
-    });
+    if (theaterId && theaters[theaterId]) {
+      theaters[theaterId] = theaters[theaterId].filter(
+        (u) => u.socketId !== socket.id
+      );
 
-    // Change current movie
-    socket.on("movie:change", ({ theaterCode, movieId }) => {
-      io.to(theaterCode).emit("movie:changed", { movieId });
-    });
+      io.to(theaterId).emit("theater-users", theaters[theaterId]);
+    }
 
-    socket.on("disconnect", () => {
-      console.log("Host/Admin socket disconnected:", socket.id);
-    });
+    console.log("Admin socket disconnected:", socket.id);
   });
 };
-
-export default setupAdminSocket;

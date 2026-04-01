@@ -1,43 +1,55 @@
-import express from "express"
-import dotenv from "dotenv"
-import cookieParser from "cookie-parser"
-import authRouter from "./routes/authRoutes.js"
-import theaterRoute from "./routes/theaterRoutes.js"
-import { connectDB } from "./config/connectDB.js"
-import cors from 'cors'
-import http from 'http'
-import setupChatSocket from "./config/socketConn.js"
-import setupAdminSocket from "./config/adminSocket.js"
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import authRouter from "./routes/authRoutes.js";
+import theaterRoute from "./routes/theaterRoutes.js";
+import { Server } from "socket.io";
+import userRoute from "./routes/userRoutes.js";
+import { connectDB } from "./config/connectDB.js";
+import cors from "cors";
+import http from "http";
+import setupChatSocket from "./config/socketConn.js";
+import { adminSocketHandler } from "./config/adminSocket.js";
 
+dotenv.config();
+connectDB();
 
-
-dotenv.config()
-connectDB()
-
-const app=express()
-app.use(express.json())
-app.use(cookieParser())
-
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  process.env.NETLIFY_URL
+  process.env.NETLIFY_URL,
 ];
 
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,               
-}));
+app.use("/api/auth", authRouter);
+app.use("/api/theater", theaterRoute);
+app.use("/api/user",userRoute)
 
-app.use("/api/auth",authRouter)
-app.use("/api/theater",theaterRoute)
+const server = http.createServer(app);
 
-const server=http.createServer(app)
-setupChatSocket(server)
-setupAdminSocket(server)
+// 🔹 CREATE SINGLE IO INSTANCE
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
+// 🔹 SETUP SOCKETS
+setupChatSocket(io); // your chat system
+io.on("connection", (socket) => {
+  adminSocketHandler(io, socket); // admin panel logic
+});
 
-
-const PORT=process.env.PORT || 5000
-server.listen(PORT,()=>console.log(`Server running on port ${PORT}`))
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
