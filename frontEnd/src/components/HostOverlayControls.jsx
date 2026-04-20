@@ -1,23 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Settings,
-  Lock,
-  Unlock,
-  Crown,
-  UserX,
-  Play,
-  Pause,
-  SkipForward,
-  X,
-} from "lucide-react";
+import {Settings,Lock,Unlock,Crown,UserX,Play,Pause,SkipForward,X,} from "lucide-react";
 
-export default function HostOverlayControls({
-  theater,
-  userId,
-  audience,
-  socket,
-  playerRef, // video ref from TheaterPlayer
+export default function HostOverlayControls({theater,userId,audience,socket, playerRef, // video ref from TheaterPlayer
 }) {
   const [open, setOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(theater.isLocked);

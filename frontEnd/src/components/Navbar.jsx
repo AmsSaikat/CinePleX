@@ -91,7 +91,7 @@ export default function Navbar() {
               <div className="absolute -inset-1 bg-linear-to-tr from-cyan-500 to-blue-600 rounded-full blur opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
               <div className="relative h-11 w-11 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-cyan-500 transition-colors">
                 <img 
-                  src={user.avatar} 
+                  src={user?.avatar} 
                   className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   alt="Profile"
                 />

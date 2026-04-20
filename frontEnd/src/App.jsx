@@ -18,6 +18,9 @@ import ProtectedRoute from './hooks/ProtectedRoutes'
 import MoviePage from './pages/MoviePage'
 import Profile from './pages/Profile'
 import UpdateProfile from './pages/UpdateProfile'
+import SquadIntel from './components/SquadIntel'
+import UploadMoviePage from './pages/movieModal/UploadMoviePage'
+import TheaterShowtimes from './pages/movieModal/TheaterShowTimes'
 
 export default function App() {
   const dispatch = useDispatch()
@@ -62,6 +65,9 @@ export default function App() {
         <Route path="/movies" element={<ProtectedRoute><MoviePage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
         <Route path="/update-profile" element={<ProtectedRoute><UpdateProfile/></ProtectedRoute>} />
+        <Route path="/upload-movie" element={<ProtectedRoute><UploadMoviePage/></ProtectedRoute>} />
+        <Route path="/shows-list" element={<ProtectedRoute><TheaterShowtimes/></ProtectedRoute>} />
+
 
         {/* Test route (could be protected too if needed) */}
         <Route path="/test" element={<UploadMovieModal />} />

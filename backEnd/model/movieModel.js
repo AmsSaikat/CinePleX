@@ -9,7 +9,6 @@ const movieSchema = new mongoose.Schema(
     },
     videoUrl: {
       type: String,
-      required: true,
     },
     theaterName:{
       type:String,
@@ -20,6 +19,11 @@ const movieSchema = new mongoose.Schema(
       ref: "User",
       required: false,
     },
+    description: { type: String, required: true },
+    thumbNail: { type: String }, // URL or path
+    video: { type: String }, // URL or path
+    theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater' },
+    createdAt: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

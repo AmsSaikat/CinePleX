@@ -13,6 +13,9 @@ import { setTheater } from "../redux/slices/theaterSlice";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import AdminModeratorPanel from "../components/AdminModeratorPannel";
+import TheaterShowtimes from "./movieModal/TheaterShowTimes";
+import UploadMoviePage from "./movieModal/UploadMoviePage";
+import AdminCommand from "./movieModal/AdminCommand";
 
 const DEMO_HLS = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
@@ -185,6 +188,10 @@ export default function ActiveTheater() {
             </div>
 
           </div>
+        </div>
+
+        <div>
+              <AdminCommand />
         </div>
       </main>
 

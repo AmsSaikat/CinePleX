@@ -10,6 +10,7 @@ import cors from "cors";
 import http from "http";
 import setupChatSocket from "./config/socketConn.js";
 import { adminSocketHandler } from "./config/adminSocket.js";
+import movieRoute from "./routes/movieRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -33,6 +34,7 @@ app.use(
 app.use("/api/auth", authRouter);
 app.use("/api/theater", theaterRoute);
 app.use("/api/user",userRoute)
+app.use("/api/movie",movieRoute)
 
 const server = http.createServer(app);
 

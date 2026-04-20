@@ -61,7 +61,7 @@ const theaterSchema = new mongoose.Schema(
     ],
 
     // Current movie being watched
-    currentMovie: {
+    currentMovies: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Movie",
       default: null,

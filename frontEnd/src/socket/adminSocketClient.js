@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const allowedOrigins = process.env.REACT_APP_CLIENT_URL || "http://localhost:3000";
+const allowedOrigins = process.env.VITE_SOCKET_URL;
 
 export const adminSocket = io(allowedOrigins, {
   autoConnect: false, // connect manually

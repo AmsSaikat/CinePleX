@@ -1,10 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Users, Shield, Target, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
+import { Users, Shield, Target, Zap, BarChart3 } from "lucide-react"; // Added BarChart3 for Intel icon
 import SquadCard from "../components/SquadCard";
 import Navbar from "../components/Navbar";
 
 export default function TheSquad() {
+  const navigate = useNavigate();
+
   const squad = [
     {
       name: "X",
@@ -40,7 +43,6 @@ export default function TheSquad() {
     },
   ];
 
-  // Animation variants for the grid
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -55,7 +57,7 @@ export default function TheSquad() {
 
       {/* --- TACTICAL BACKGROUND OVERLAY --- */}
       <div className="fixed inset-0 pointer-events-none opacity-20">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
       </div>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20">
@@ -79,12 +81,31 @@ export default function TheSquad() {
             <span className="text-zinc-400 font-medium tracking-widest">ONE MISSION. ZERO LATENCY.</span>
           </p>
 
-          <div className="flex justify-center gap-8 pt-6">
+          {/* --- TACTICAL STATS & INTEL ACTION --- */}
+          <div className="flex justify-center items-center gap-10 pt-8">
              <div className="flex flex-col items-center">
                 <span className="text-2xl font-black text-white">04</span>
                 <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Active</span>
              </div>
-             <div className="h-10 w-px bg-white/10" />
+             
+             <div className="h-8 w-px bg-white/10" />
+
+             {/* NEW: INTEL LINK STAT */}
+             <button 
+                onClick={() => navigate('/intel')}
+                className="group flex flex-col items-center relative"
+             >
+                <div className="absolute -top-1 px-2 py-0.5 bg-cyan-500 text-[8px] font-bold text-black uppercase tracking-tighter rounded-sm opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:-translate-y-4">
+                    Access
+                </div>
+                <div className="p-3 mb-1 rounded-full border border-cyan-500/20 group-hover:border-cyan-500 group-hover:bg-cyan-500/10 transition-all duration-500 shadow-[0_0_15px_rgba(6,182,212,0)] group-hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                    <BarChart3 size={20} className="text-cyan-500" />
+                </div>
+                <span className="text-[10px] text-cyan-500/60 group-hover:text-cyan-400 uppercase tracking-[0.3em] font-black transition-colors">Intel</span>
+             </button>
+
+             <div className="h-8 w-px bg-white/10" />
+
              <div className="flex flex-col items-center">
                 <span className="text-2xl font-black text-cyan-500">100%</span>
                 <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Ready</span>
@@ -113,8 +134,8 @@ export default function TheSquad() {
           transition={{ delay: 1 }}
           className="mt-24 text-center"
         >
-          <button className="px-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-cyan-500 hover:border-cyan-500 transition-all shadow-xl">
-             + ADD NEW OPERATIVE
+          <button className="px-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-cyan-500 hover:border-cyan-500 transition-all shadow-xl group">
+              <span className="group-hover:scale-110 transition-transform inline-block mr-2">+</span> ADD NEW OPERATIVE
           </button>
         </motion.div>
       </main>

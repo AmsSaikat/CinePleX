@@ -12,7 +12,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen w-full bg-[#020617] pt-5 text-[#e0e0e0] font-light selection:bg-indigo-500/40">
       {/* Background Texture & Ambient Glow */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('[https://www.transparenttextures.com/patterns/stardust.png](https://www.google.com/search?q=https://www.transparenttextures.com/patterns/stardust.png)')]"></div>
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('[https://www.transparenttextures.com/patterns/stardust.png]')]"></div>
       <div className="fixed top-[-20%] right-[-10%] w-150 h-150 bg-indigo-900/20 blur-[150px] rounded-full"></div>
       
       <Navbar />
