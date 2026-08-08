@@ -15,6 +15,11 @@ const userSchema=new mongoose.Schema({
         required:true,
         minlength:8
     },
+    uid:{
+        type:String,
+        required:true,
+        unique:true
+    },
     lastLogin:{
         type:Date,
         default:Date.now()

@@ -1,222 +1,421 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Upload, Film, FileText, CheckCircle2, AlertCircle, X, Image as ImageIcon } from 'lucide-react';
-import Navbar from '../../components/Navbar';
+import { Upload, Film, Image as ImageIcon, X, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function UploadMoviePage() {
-    const [message, setMessage] = useState(null);
+    const [form, setForm] = useState({
+        title: '',
+        description: '',
+        genre: 'Action',
+        releaseYear: new Date().getFullYear(),
+        duration: '',
+    });
+
+    const [videoFile, setVideoFile] = useState(null);
     const [thumbImg, setThumbImg] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
+
     const [errors, setErrors] = useState({});
-    const [form, setForm] = useState({ title: '', description: '', thumbNail: '', public_id: '' });
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [statusMessage, setStatusMessage] = useState(null);
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-        setErrors({ ...errors, [e.target.name]: '' });
-    };
+    const thumbInputRef = useRef(null);
+    const videoInputRef = useRef(null);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setThumbImg(file);
-            setPreviewUrl(URL.createObjectURL(file));
+    // Memory Leak Cleanup on Unmount
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    // Input Change Handler
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: null }));
         }
     };
 
-    const validate = () => {
+    // Thumbnail Select Handler with Revoke Cleanup
+    const handleThumbChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setErrors((prev) => ({ ...prev, thumbnail: 'INVALID IMAGE FILE' }));
+            return;
+        }
+
+        // Clean up previous ObjectURL reference to prevent memory leaks
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setThumbImg(file);
+        setPreviewUrl(URL.createObjectURL(file));
+        setErrors((prev) => ({ ...prev, thumbnail: null }));
+    };
+
+    // Remove Thumbnail Handler
+    const handleRemoveThumb = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setThumbImg(null);
+        setPreviewUrl(null);
+        if (thumbInputRef.current) thumbInputRef.current.value = '';
+    };
+
+    // Video Selection with Strict Validation
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['video/mp4', 'video/x-matroska', 'video/mkv'];
+        const isValidExtension = /\.(mp4|mkv)$/i.test(file.name);
+
+        if (!validTypes.includes(file.type) && !isValidExtension) {
+            setErrors((prev) => ({
+                ...prev,
+                video: 'INVALID FORMAT: ONLY .MP4 AND .MKV ACCEPTED',
+            }));
+            setVideoFile(null);
+            if (videoInputRef.current) videoInputRef.current.value = '';
+            return;
+        }
+
+        setVideoFile(file);
+        setErrors((prev) => ({ ...prev, video: null }));
+    };
+
+    // Remove Video Handler
+    const handleRemoveVideo = () => {
+        setVideoFile(null);
+        if (videoInputRef.current) videoInputRef.current.value = '';
+    };
+
+    // Form Validation
+    const validateForm = () => {
         const err = {};
-        if (!form.title.trim()) err.title = "IDENTIFIER REQUIRED";
-        if (!form.description.trim()) err.description = "MANIFEST DATA REQUIRED";
+        if (!form.title.trim()) err.title = 'IDENTIFIER REQUIRED';
+        if (!form.description.trim()) err.description = 'MANIFEST DATA REQUIRED';
+        if (!form.duration.trim()) err.duration = 'DURATION REQUIRED';
+        
+        if (!videoFile) {
+            err.video = 'VIDEO PAYLOAD REQUIRED (.MP4 / .MKV)';
+        }
+
+        if (!thumbImg) {
+            err.thumbnail = 'COVER ARTWORK REQUIRED';
+        }
+
         return err;
     };
 
+    // Submit Handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const validationErrors = validate();
+        
+        const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
 
         setIsUploading(true);
+        setUploadProgress(0);
+        setStatusMessage(null);
+
+        const formData = new FormData();
+        formData.append('title', form.title);
+        formData.append('description', form.description);
+        formData.append('genre', form.genre);
+        formData.append('releaseYear', form.releaseYear);
+        formData.append('duration', form.duration);
+        formData.append('video', videoFile);
+        formData.append('thumbnail', thumbImg);
+
         try {
-            let imageUrl = '';
-            let public_id = '';
-
-            if (thumbImg) {
-                const cloudData = new FormData();
-                cloudData.append('file', thumbImg);
-                cloudData.append("upload_preset", "CiNEPLeX");
-
-                const cloudRes = await axios.post(
-                    `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`,
-                    cloudData
-                );
-                imageUrl = cloudRes.data.secure_url;
-                public_id = cloudRes.data.public_id;
-            }
-
-            const payload = { ...form, thumbNail: imageUrl, public_id: public_id };
-            const res = await axios.post(
+            const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}movie/upload-movie`,
-                payload,
-                { withCredentials: true }
+                formData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    onUploadProgress: (progressEvent) => {
+                        const percent = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        setUploadProgress(percent);
+                    },
+                }
             );
 
-            setMessage({ text: res.data.message, type: 'success' });
-            setForm({ title: '', description: '', thumbNail: '', public_id: '' });
-            setThumbImg(null);
-            setPreviewUrl(null);
-        } catch (error) {
-            setMessage({ text: "CRITICAL UPLOAD FAILURE", type: 'error' });
-            console.error(error);
+            if (response.data.success) {
+                setStatusMessage({ type: 'success', text: 'PAYLOAD DEPLOYED SUCCESSFULLY' });
+                // Reset form state
+                setForm({
+                    title: '',
+                    description: '',
+                    genre: 'Action',
+                    releaseYear: new Date().getFullYear(),
+                    duration: '',
+                });
+                handleRemoveThumb();
+                handleRemoveVideo();
+            }
+        } catch (err) {
+            setStatusMessage({
+                type: 'error',
+                text: err.response?.data?.message || 'TRANSMISSION FAILED: SYSTEM ERROR',
+            });
         } finally {
             setIsUploading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#020617] text-white selection:bg-cyan-500/30">
-            <Navbar />
-            
-            {/* --- BACKGROUND ELEMENTS --- */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/5 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full" />
-            </div>
-
-            <main className="relative z-10 max-w-5xl mx-auto px-6 pt-32 pb-20">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }} 
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
-                >
-                    <div className="flex items-center gap-3 mb-2 text-cyan-500">
-                        <Upload size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em]">Asset Deployment</span>
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-12 flex justify-center items-center font-mono">
+            <div className="w-full max-w-4xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-md rounded-xl p-8 shadow-2xl">
+                
+                {/* Header */}
+                <div className="border-b border-zinc-800 pb-6 mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-wider text-cyan-400 uppercase flex items-center gap-2">
+                            <Upload className="w-6 h-6 text-cyan-400" />
+                            Media Ingestion Protocol
+                        </h1>
+                        <p className="text-xs text-zinc-500 mt-1">SYSTEM STATUS: READY FOR PAYLOAD TRANSMISSION</p>
                     </div>
-                    <h1 className="text-5xl font-black italic tracking-tighter uppercase">Initialize_<span className="text-cyan-500">Uploader</span></h1>
-                </motion.div>
+                </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-12 gap-8">
-                    
-                    {/* --- LEFT: THUMBNAIL UPLOAD --- */}
-                    <motion.div 
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="col-span-12 lg:col-span-5"
+                {/* Status Message Display */}
+                {statusMessage && (
+                    <div
+                        className={`mb-6 p-4 rounded-lg flex items-center gap-3 border ${
+                            statusMessage.type === 'success'
+                                ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400'
+                                : 'bg-rose-950/40 border-rose-500/50 text-rose-400'
+                        }`}
                     >
-                        <div className="group relative w-full aspect-[2/3] rounded-[2rem] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center overflow-hidden transition-all hover:border-cyan-500/50">
-                            {previewUrl ? (
-                                <>
-                                    <img src={previewUrl} className="absolute inset-0 w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110" alt="Preview" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent" />
-                                    <button 
-                                        type="button"
-                                        onClick={() => {setThumbImg(null); setPreviewUrl(null);}}
-                                        className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-md rounded-full text-white/50 hover:text-red-400 transition-colors"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </>
-                            ) : (
-                                <div className="text-center p-8">
-                                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                        <ImageIcon className="text-zinc-600 group-hover:text-cyan-500" size={32} />
-                                    </div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-300">Drop Visual Asset</p>
-                                    <p className="text-[9px] text-zinc-700 mt-2">JPG, PNG or WEBP (Max 5MB)</p>
-                                </div>
-                            )}
-                            <input 
-                                type="file" 
-                                className="absolute inset-0 opacity-0 cursor-pointer" 
-                                onChange={handleFileChange}
-                                accept="image/*"
-                            />
-                        </div>
-                    </motion.div>
+                        {statusMessage.type === 'success' ? (
+                            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                        ) : (
+                            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        )}
+                        <span className="text-sm tracking-wide">{statusMessage.text}</span>
+                    </div>
+                )}
 
-                    {/* --- RIGHT: FORM DATA --- */}
-                    <motion.div 
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="col-span-12 lg:col-span-7 space-y-8"
-                    >
-                        <InputField 
-                            label="Movie Identifier" 
-                            name="title" 
-                            value={form.title} 
-                            onChange={handleChange} 
-                            icon={<Film size={18}/>} 
-                            error={errors.title}
-                            placeholder="e.g. PROJECT_GHOST"
-                        />
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-2">
-                                <FileText size={14} /> Manifest Description
-                            </label>
-                            <textarea 
-                                name="description"
-                                value={form.description}
-                                onChange={handleChange}
-                                placeholder="Enter mission parameters..."
-                                className={`w-full bg-white/[0.03] border ${errors.description ? 'border-red-500/50' : 'border-white/10'} rounded-2xl p-6 h-40 focus:outline-none focus:border-cyan-500/50 transition-all text-zinc-300 placeholder:text-zinc-700 resize-none`}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Grid Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        {/* Title */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Title / Identifier</label>
+                            <input
+                                type="text"
+                                name="title"
+                                value={form.title}
+                                onChange={handleInputChange}
+                                disabled={isUploading}
+                                placeholder="ENTER MOVIE TITLE"
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             />
-                            {errors.description && <span className="text-[9px] font-bold text-red-500 tracking-widest">{errors.description}</span>}
+                            {errors.title && <p className="text-xs text-rose-500 mt-1">{errors.title}</p>}
                         </div>
 
-                        <button 
+                        {/* Genre */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Genre Classification</label>
+                            <select
+                                name="genre"
+                                value={form.genre}
+                                onChange={handleInputChange}
+                                disabled={isUploading}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <option value="Action">Action</option>
+                                <option value="Sci-Fi">Sci-Fi</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Drama">Drama</option>
+                                <option value="Cyberpunk">Cyberpunk</option>
+                                <option value="Documentary">Documentary</option>
+                            </select>
+                        </div>
+
+                        {/* Release Year */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Release Cycle Year</label>
+                            <input
+                                type="number"
+                                name="releaseYear"
+                                value={form.releaseYear}
+                                onChange={handleInputChange}
+                                disabled={isUploading}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            />
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Duration (e.g. 124 min)</label>
+                            <input
+                                type="text"
+                                name="duration"
+                                value={form.duration}
+                                onChange={handleInputChange}
+                                disabled={isUploading}
+                                placeholder="120 MIN"
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            />
+                            {errors.duration && <p className="text-xs text-rose-500 mt-1">{errors.duration}</p>}
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                        <label className="block text-xs uppercase text-zinc-400 mb-2">Synopsis / Manifest</label>
+                        <textarea
+                            name="description"
+                            rows={3}
+                            value={form.description}
+                            onChange={handleInputChange}
                             disabled={isUploading}
-                            className="w-full relative group h-16 rounded-2xl bg-cyan-500 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] disabled:opacity-50"
-                        >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                            <span className="relative z-10 text-black font-black uppercase tracking-[0.4em] flex items-center justify-center gap-3">
-                                {isUploading ? 'SYNCHRONIZING...' : 'EXECUTE UPLOAD'}
-                            </span>
-                        </button>
-                    </motion.div>
-                </form>
+                            placeholder="BRIEF OVERVIEW OF THE MEDIA CONTENT..."
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-4 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors resize-none"
+                        />
+                        {errors.description && <p className="text-xs text-rose-500 mt-1">{errors.description}</p>}
+                    </div>
 
-                {/* --- FEEDBACK TOAST --- */}
-                <AnimatePresence>
-                    {message && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className={`fixed bottom-10 right-10 flex items-center gap-4 p-6 rounded-2xl backdrop-blur-2xl border ${message.type === 'success' ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}
-                        >
-                            {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-                            <span className="text-xs font-black uppercase tracking-widest">{message.text}</span>
-                            <X size={16} className="ml-4 cursor-pointer" onClick={() => setMessage(null)} />
-                        </motion.div>
+                    {/* Media Upload Drops Zone */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        {/* Thumbnail Drop Zone */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Cover Artwork (Image)</label>
+                            <div className="border-2 border-dashed border-zinc-800 rounded-xl p-4 bg-zinc-950/50 flex flex-col items-center justify-center relative min-h-[160px]">
+                                {previewUrl ? (
+                                    <div className="relative w-full h-36">
+                                        <img
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover rounded-lg border border-zinc-800"
+                                        />
+                                        {!isUploading && (
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveThumb}
+                                                className="absolute top-2 right-2 bg-zinc-900/80 hover:bg-rose-600 text-zinc-200 p-1.5 rounded-full transition-colors"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <label className={`cursor-pointer flex flex-col items-center justify-center w-full h-full ${isUploading ? 'cursor-not-allowed opacity-50' : ''}`}>
+                                        <ImageIcon className="w-8 h-8 text-zinc-600 mb-2" />
+                                        <span className="text-xs text-zinc-400">CLICK TO UPLOAD ARTWORK</span>
+                                        <input
+                                            ref={thumbInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleThumbChange}
+                                            disabled={isUploading}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                            {errors.thumbnail && <p className="text-xs text-rose-500 mt-1">{errors.thumbnail}</p>}
+                        </div>
+
+                        {/* Video Drop Zone */}
+                        <div>
+                            <label className="block text-xs uppercase text-zinc-400 mb-2">Video Stream (.MP4 / .MKV)</label>
+                            <div className="border-2 border-dashed border-zinc-800 rounded-xl p-4 bg-zinc-950/50 flex flex-col items-center justify-center relative min-h-[160px]">
+                                {videoFile ? (
+                                    <div className="flex flex-col items-center justify-center w-full p-4 bg-zinc-900 rounded-lg border border-zinc-800 relative">
+                                        <Film className="w-8 h-8 text-cyan-400 mb-2" />
+                                        <p className="text-xs text-zinc-200 truncate max-w-[200px]">{videoFile.name}</p>
+                                        <span className="text-[10px] text-zinc-500 mt-1">
+                                            {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
+                                        </span>
+                                        {!isUploading && (
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveVideo}
+                                                className="absolute top-2 right-2 bg-zinc-800 hover:bg-rose-600 text-zinc-200 p-1.5 rounded-full transition-colors"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <label className={`cursor-pointer flex flex-col items-center justify-center w-full h-full ${isUploading ? 'cursor-not-allowed opacity-50' : ''}`}>
+                                        <Film className="w-8 h-8 text-zinc-600 mb-2" />
+                                        <span className="text-xs text-zinc-400">SELECT MOVIE PAYLOAD</span>
+                                        <span className="text-[10px] text-zinc-600 mt-1">MAX RESTRICTION ACCORDING TO B2</span>
+                                        <input
+                                            ref={videoInputRef}
+                                            type="file"
+                                            accept="video/mp4,video/x-matroska,.mp4,.mkv"
+                                            onChange={handleVideoChange}
+                                            disabled={isUploading}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                            {errors.video && <p className="text-xs text-rose-500 mt-1">{errors.video}</p>}
+                        </div>
+
+                    </div>
+
+                    {/* Progress Bar */}
+                    {isUploading && (
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs text-zinc-400">
+                                <span className="flex items-center gap-1.5">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                                    UPLOADING PAYLOAD...
+                                </span>
+                                <span>{uploadProgress}%</span>
+                            </div>
+                            <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-800">
+                                <div
+                                    className="bg-cyan-500 h-full transition-all duration-300 ease-out"
+                                    style={{ width: `${uploadProgress}%` }}
+                                />
+                            </div>
+                        </div>
                     )}
-                </AnimatePresence>
-            </main>
-        </div>
-    );
-}
 
-function InputField({ label, name, value, onChange, icon, error, placeholder }) {
-    return (
-        <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-2">
-                {icon} {label}
-            </label>
-            <div className="relative">
-                <input 
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    placeholder={placeholder}
-                    className={`w-full bg-white/[0.03] border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-6 h-14 focus:outline-none focus:border-cyan-500/50 transition-all text-zinc-300 placeholder:text-zinc-700`}
-                />
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        disabled={isUploading}
+                        className="w-full bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold py-3 rounded-lg text-sm tracking-wider uppercase transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isUploading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                INGESTING MEDIA...
+                            </>
+                        ) : (
+                            <>
+                                <Upload className="w-4 h-4" />
+                                DISPATCH PAYLOAD
+                            </>
+                        )}
+                    </button>
+                </form>
             </div>
-            {error && <span className="text-[9px] font-bold text-red-500 tracking-widest uppercase">{error}</span>}
         </div>
     );
 }

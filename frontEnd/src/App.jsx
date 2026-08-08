@@ -7,7 +7,6 @@ import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { clearUser, setLoading, setUser } from './redux/slices/authSlice'
 import Theater from './pages/Theater'
-import TheSquad from './pages/TheSquad'
 import JoinTheater from './pages/JoinTheater'
 import ActiveTheater from './pages/ActiveTheater'
 import ChatBox from './components/ChatBox'
@@ -21,6 +20,11 @@ import UpdateProfile from './pages/UpdateProfile'
 import SquadIntel from './components/SquadIntel'
 import UploadMoviePage from './pages/movieModal/UploadMoviePage'
 import TheaterShowtimes from './pages/movieModal/TheaterShowTimes'
+import NewOperative from './pages/squad/NewOperative'
+import SquadHub from './pages/squad/SquadHub'
+import CreateSquad from './pages/squad/CreateSquad'
+import JoinSquad from './pages/squad/JoinSquad'
+import SquadSettings from './pages/squad/SquadSettings'
 
 export default function App() {
   const dispatch = useDispatch()
@@ -57,7 +61,11 @@ export default function App() {
         {/* Protected routes */}
         <Route path="/theater" element={<ProtectedRoute><Theater /></ProtectedRoute>}/>
         <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>}/>
-        <Route path="/squad" element={<ProtectedRoute><TheSquad /></ProtectedRoute>}/>
+        <Route path="/squad" element={<ProtectedRoute><SquadHub /></ProtectedRoute>}/>
+        <Route path="/squad/create" element={<ProtectedRoute><CreateSquad /></ProtectedRoute>}/>
+        <Route path="/squad/join" element={<ProtectedRoute><JoinSquad /></ProtectedRoute>}/>
+        <Route path="/squad/settings" element={<ProtectedRoute><SquadSettings /></ProtectedRoute>}/>
+        <Route path="/squad/new-operative" element={<ProtectedRoute><NewOperative /></ProtectedRoute>} />
         <Route path="/join-theater" element={<ProtectedRoute><JoinTheater /></ProtectedRoute>}/>
         <Route path="/create-theater" element={<ProtectedRoute><CreateTheater /></ProtectedRoute>}/>
         <Route path="/active-theater/:code" element={<ProtectedRoute><ActiveTheater /></ProtectedRoute>}/>

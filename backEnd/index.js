@@ -11,6 +11,7 @@ import http from "http";
 import setupChatSocket from "./config/socketConn.js";
 import { adminSocketHandler } from "./config/adminSocket.js";
 import movieRoute from "./routes/movieRoutes.js";
+import squadRouter from "./routes/squadRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -35,6 +36,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/theater", theaterRoute);
 app.use("/api/user",userRoute)
 app.use("/api/movie",movieRoute)
+app.use("/api/squad",squadRouter)
 
 const server = http.createServer(app);
 

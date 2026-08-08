@@ -9,7 +9,7 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if user already exists
+    // 1. Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
@@ -17,19 +17,31 @@ export const signup = async (req, res) => {
       });
     }
 
-    // Hash password
+    // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // 3. Generate unique 8-digit UID
+    let generatedUid = Math.floor(10000000 + Math.random() * 90000000).toString();
+    
+    // Ensure uniqueness in DB (prevents collisions)
+    let isUidTaken = await User.findOne({ uid: generatedUid });
+    while (isUidTaken) {
+      generatedUid = Math.floor(10000000 + Math.random() * 90000000).toString();
+      isUidTaken = await User.findOne({ uid: generatedUid });
+    }
+
+    // 4. Create new user
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
+      uid: generatedUid, // <--- Correctly passing the string value
     });
 
     await newUser.save();
 
-    GenerateTokenAndSetCookie(res,newUser._id)
+    // 5. Generate token & set cookie
+    GenerateTokenAndSetCookie(res, newUser._id);
 
     return res.status(201).json({
       message: "User created successfully",
@@ -37,6 +49,7 @@ export const signup = async (req, res) => {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        uid: newUser.uid, // <--- Returning the generated string value
       },
     });
   } catch (error) {
@@ -45,7 +58,6 @@ export const signup = async (req, res) => {
     });
   }
 };
-
 
 
 // ================= LOGIN =================
